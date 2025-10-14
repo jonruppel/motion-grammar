@@ -221,6 +221,11 @@ class App {
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             icon.className = newTheme === 'dark' ? 'bx bx-moon' : 'bx bx-sun';
+            
+            // Dispatch custom event for theme changes
+            window.dispatchEvent(new CustomEvent('themechange', {
+                detail: { theme: newTheme }
+            }));
         });
     }
 

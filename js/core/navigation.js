@@ -5,9 +5,34 @@ import { Sidebar } from '../components/index.js';
 
 export const navigationData = [
     {
-        id: 'experiences',
-        title: 'Product Experiences',
-        icon: 'bx-layout',
+        id: 'visualizations',
+        title: 'Visualizations',
+        icon: 'bx-paint',
+        children: [
+            { 
+                id: 'viz-lava', 
+                title: 'Lava Lamp', 
+                module: 'pages/visualization-lava-lamp',
+                description: 'Organic flowing metaball animation'
+            },
+            { 
+                id: 'viz-network', 
+                title: 'Blob Network', 
+                module: 'pages/visualization-blob-network',
+                description: '2D IK system with visible connections'
+            },
+            { 
+                id: 'viz-forest', 
+                title: 'Forest', 
+                module: 'pages/visualization-forest',
+                description: 'Infinite forest of Munari-style trees with wind'
+            }
+        ]
+    },
+    {
+        id: 'page-examples',
+        title: 'Page Examples',
+        icon: 'bx-file',
         children: [
             { 
                 id: 'exp-tasks', 
@@ -44,31 +69,6 @@ export const navigationData = [
                 title: 'Stock Market', 
                 module: 'pages/stocks',
                 description: 'Real-time stock market data with interactive charts'
-            }
-        ]
-    },
-    {
-        id: 'visualizations',
-        title: 'Visualizations',
-        icon: 'bx-paint',
-        children: [
-            { 
-                id: 'viz-lava', 
-                title: 'Lava Lamp', 
-                module: 'pages/visualization-lava-lamp',
-                description: 'Organic flowing metaball animation'
-            },
-            { 
-                id: 'viz-network', 
-                title: 'Blob Network', 
-                module: 'pages/visualization-blob-network',
-                description: '2D IK system with visible connections'
-            },
-            { 
-                id: 'viz-forest', 
-                title: 'Forest', 
-                module: 'pages/visualization-forest',
-                description: 'Infinite forest of Munari-style trees with wind'
             }
         ]
     },

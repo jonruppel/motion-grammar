@@ -9,7 +9,7 @@
     height: calc(100vh - var(--spacing-md) * 2); /* Full height minus margins (top and bottom) */
     border-radius: var(--radius-xl);
     overflow: hidden;
-    background: #0a0a0a; /* Match hero dark background */
+    background: var(--color-bg-primary); /* Match hero dark background */
     box-sizing: border-box;
 }
 

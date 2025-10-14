@@ -44,7 +44,7 @@ export const LAVA_LAMP_SETTINGS = {
         fov: 20,
         positionZ: 15,
         toneMappingExposure: 0.1,
-        canvasOpacity: 0.8
+        canvasOpacity: 1.0
     }
 };
 
@@ -73,6 +73,23 @@ export class LavaLamp {
         };
         
         this.init();
+    }
+    
+    parseCSSColor(cssValue) {
+        if (cssValue.startsWith('var(--')) {
+            // Extract variable name
+            const varName = cssValue.replace('var(', '').replace(')', '').trim();
+            // Get computed value from document
+            const computedValue = getComputedStyle(document.documentElement).getPropertyValue(varName);
+            
+            if (computedValue) {
+                // Convert CSS color to THREE.js color
+                return new THREE.Color(computedValue.trim());
+            }
+        }
+        
+        // Fallback to default parsing (hex, rgb, etc.)
+        return new THREE.Color(cssValue);
     }
     
     pause() {
@@ -164,7 +181,7 @@ export class LavaLamp {
         
         // Setup scene
         this.scene = new THREE.Scene();
-        this.scene.background = null; // Transparent for canvas
+        this.scene.background = new THREE.Color(this.parseCSSColor("var(--color-bg-secondary)"));
         
         // Setup camera
         this.camera = new THREE.PerspectiveCamera(
@@ -206,6 +223,10 @@ export class LavaLamp {
         // Handle resize
         this.handleResize = this.onResize.bind(this);
         window.addEventListener('resize', this.handleResize);
+        
+        // Listen for theme changes
+        this.handleThemeChange = this.onThemeChange.bind(this);
+        window.addEventListener('themechange', this.handleThemeChange);
         
         // Start animation
         this.animate();
@@ -391,6 +412,11 @@ export class LavaLamp {
             this.composer.setSize(width, height);
         }
     }
+
+    onThemeChange() {
+        // Update background color when theme changes
+        this.scene.background = new THREE.Color(this.parseCSSColor("var(--color-bg-secondary)"));
+    }
     
     dispose() {
         // Stop animation
@@ -400,6 +426,7 @@ export class LavaLamp {
         
         // Remove event listeners
         window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('themechange', this.handleThemeChange);
         
         // Dispose Three.js resources
         this.blobs.forEach(blob => {

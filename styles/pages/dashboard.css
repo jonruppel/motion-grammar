@@ -57,17 +57,7 @@
         &.active {
             color: var(--color-accent) !important;
             font-weight: var(--font-weight-semibold);
-
-            &::before {
-                right: 0;
-                left: 0;
-                background-color: transparent;
-                border: 1.5px solid var(--color-accent);
-                border-radius: 50px;
-                /* Subtle glow for visibility */
-                box-shadow: 0 1px 4px rgba(var(--color-accent-rgb), 0.15);
-                z-index: -1;
-            }
+            border: 2px solid var(--color-accent);
         }
     }
 

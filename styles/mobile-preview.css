@@ -428,12 +428,14 @@
     .mobile-preview-active .mobile-menu-toggle {
         display: flex !important;
         position: absolute;
-        top: calc(37px + var(--spacing-md) + 12px);
+        top: calc(37px + var(--spacing-md) + 12px); /* Below Dynamic Island */
         left: var(--spacing-lg);
         z-index: 9999;
         align-items: center;
         justify-content: center;
         transition: left var(--transition-base), top var(--transition-base), background var(--transition-fast), box-shadow var(--transition-fast);
+        /* Ensure it's inside iPhone bounds */
+        margin: 0 !important;
     }
 
     /* When menu is active in mockup mode, move button to right side like mobile */
@@ -805,5 +807,71 @@
     .mobile-preview-active .app-container {
         position: static !important;
     }
+}
+
+/* Apply ALL mobile breakpoint styles to mockup view */
+.mobile-preview-active {
+    /* Copy all styles from @media (max-width: 768px) that should apply to mockup */
+    /* This ensures the entire homepage uses mobile styles in mockup view */
+}
+
+/* Specifically target the app container to ensure mobile layout */
+.mobile-preview-active .app-container {
+    flex-direction: column !important;
+    min-height: 100vh !important;
+}
+
+.mobile-preview-active .main-content {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+.mobile-preview-active .content-header,
+.mobile-preview-active .content-body {
+    padding: var(--spacing-lg) !important;
+}
+
+.mobile-preview-active .content-body {
+    padding-top: 0 !important;
+}
+
+.mobile-preview-active .theme-controls {
+    position: fixed !important;
+    top: var(--spacing-lg) !important;
+    right: var(--spacing-lg) !important;
+    z-index: 1001 !important;
+}
+
+.mobile-preview-active .theme-toggle,
+.mobile-preview-active .mobile-preview-toggle {
+    width: 44px !important;
+    height: 44px !important;
+}
+
+.mobile-preview-active .theme-toggle i,
+.mobile-preview-active .mobile-preview-toggle i {
+    font-size: 22px !important;
+}
+
+.mobile-preview-active .page-title {
+    font-size: var(--font-size-2xl) !important;
+}
+
+.mobile-preview-active .page-title br {
+    display: block !important;
+}
+
+.mobile-preview-active .nav-group {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+.mobile-preview-active .nav-group > .nav-items {
+    max-height: 2000px !important;
 }
 

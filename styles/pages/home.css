@@ -27,7 +27,7 @@
 /* Hero Section - Apple-inspired rhythm */
 .home-hero {
     /* Structural properties - margins, sizing, background */
-    background: #0a0a0a; /* Always dark for lava effect */
+    background: var(--color-bg-secondary); /* Use secondary background color */
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-xl);
@@ -73,7 +73,7 @@
 
 @keyframes fadeInLavaLamp {
     to {
-        opacity: 0.8;
+        opacity: 1;
     }
 }
 
@@ -81,7 +81,7 @@
 .home-subtitle {
     position: relative;
     z-index: 1;
-    color: #ffffff !important; /* Always white on dark lava background */
+    color: var(--color-text-primary) !important; /* Use primary text color */
     user-select: none; /* Prevent text selection */
     -webkit-user-select: none;
     -moz-user-select: none;

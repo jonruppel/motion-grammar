@@ -5,6 +5,7 @@
 
 import { LavaLamp } from '../visualizations/lava-lamp.js';
 import { BlobIK } from '../visualizations/blob-ik.js';
+import { Forest } from '../visualizations/forest.js';
 
 export class AnimationCarousel {
     constructor(container) {
@@ -32,6 +33,12 @@ export class AnimationCarousel {
                 name: 'Blob Network',
                 class: BlobIK,
                 icon: 'bx-network-chart'
+            },
+            {
+                id: 'forest',
+                name: 'Forest',
+                class: Forest,
+                icon: 'bx-leaf'
             }
         ];
         
@@ -119,15 +126,6 @@ export class AnimationCarousel {
         // Create new animation
         const AnimationClass = this.animations[index].class;
         this.currentAnimation = new AnimationClass(this.container);
-        
-        if (animated) {
-            // Start hidden and fade in
-            if (this.currentAnimation.canvas) {
-                this.currentAnimation.canvas.style.opacity = '0';
-                await this.wait(100);
-                await this.fadeIn(this.currentAnimation.canvas);
-            }
-        }
         
         this.isTransitioning = false;
         
@@ -220,6 +218,12 @@ export class AnimationCarousel {
                 name: 'Blob Network',
                 icon: 'bx-network-chart',
                 index: 1
+            },
+            {
+                id: 'mood-forest',
+                name: 'Forest',
+                icon: 'bx-leaf',
+                index: 2
             }
         ];
     }

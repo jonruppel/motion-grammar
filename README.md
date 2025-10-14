@@ -2,7 +2,7 @@
 
 > A comprehensive exploration of motion design principles and interaction patterns
 
-A portfolio of full-featured product experiences that showcase how motion and interaction systems come together to support real user goals. Motion Grammar demonstrates cohesive design thinking across multi-step workflows, establishing a shared vocabulary for purposeful animation.
+A journal of motion design examples and interactive visualizations. This project showcases how motion and interaction patterns can be applied across different page types and experiences, serving as a reference for purposeful animation in web interfaces.
 
 ## 🎯 What This Is
 
@@ -24,7 +24,7 @@ node server.js
 
 Visit **http://localhost:5556**
 
-## 📱 Product Experiences
+## 📱 Page Examples
 
 ### 1. Task Management System
 A complete workflow for creating, organizing, and completing tasks.
@@ -101,7 +101,7 @@ Consistency through shared tokens and principles. Motion serves the product, not
 ```
 product-motion-systems/
 ├── js/
-│   ├── experiences/          # Complete product experiences
+│   ├── pages/                # Complete product pages
 │   │   ├── task-management.js
 │   │   ├── ecommerce.js
 │   │   └── dashboard.js
@@ -114,7 +114,7 @@ product-motion-systems/
 ├── styles/
 │   ├── global.css           # Design system
 │   ├── navigation.css       # Sidebar styles
-│   └── experiences.css      # Experience-specific styles
+│   └── pages.css            # Page-specific styles
 ├── images/                   # Assets
 ├── index.html               # Entry point
 └── server.js                # Development server

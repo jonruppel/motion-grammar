@@ -20,8 +20,11 @@ export const FOREST_SETTINGS = {
         curvature: 0.15, // How much branches curve (0 = straight, higher = more curve)
         leafClusterSize: 8, // Leaves per branch tip
         leafRadius: 0.12,
-        leafColor: 0x5CB85C, // Nice green
-        lineColor: 0x000000, // Black lines
+        leafColor: "var(--color-accent)", // Use CSS accent color
+        lineColor: {
+            light: "var(--color-border)", // Use border color for light theme
+            dark: "var(--color-border)"   // Use border color for dark theme
+        },
         groundY: -4
     },
     wind: {
@@ -52,7 +55,7 @@ export const FOREST_SETTINGS = {
         far: 100
     },
     background: {
-        color: 0xFFFFFF // White canvas
+        color: "var(--color-bg-secondary)" // Use secondary background color
     }
 };
 
@@ -157,7 +160,7 @@ export class Forest {
         
         // Setup scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(this.settings.background.color);
+        this.scene.background = new THREE.Color(this.parseCSSColor(this.settings.background.color));
         
         // Setup camera - fixed position to view trees passing by
         this.camera = new THREE.PerspectiveCamera(
@@ -189,8 +192,36 @@ export class Forest {
         this.handleResize = this.onResize.bind(this);
         window.addEventListener('resize', this.handleResize);
         
+        // Listen for theme changes
+        this.handleThemeChange = this.onThemeChange.bind(this);
+        window.addEventListener('themechange', this.handleThemeChange);
+        
         // Start animation loop
         this.animate();
+    }
+    
+    onThemeChange() {
+        // Update all colors when theme changes
+        this.updateColors();
+    }
+    
+    updateColors() {
+        // Update scene background
+        this.scene.background = new THREE.Color(this.parseCSSColor(this.settings.background.color));
+        
+        // Update all tree materials
+        this.trees.forEach(treeData => {
+            treeData.group.traverse((child) => {
+                if (child.material) {
+                    if (child.userData && child.userData.type === 'branch') {
+                        child.material.color = this.parseCSSColor(this.settings.tree.lineColor);
+                    } else if (child.userData && child.userData.type === 'leaves') {
+                        child.material.color = this.parseCSSColor(this.settings.tree.leafColor);
+                    }
+                    child.material.needsUpdate = true;
+                }
+            });
+        });
     }
     
     createInitialForest() {
@@ -322,7 +353,7 @@ export class Forest {
         // Create tube geometry for thick branch
         const tubeGeometry = new THREE.TubeGeometry(curve, 32, tubeRadius, 8, false);
         const tubeMaterial = new THREE.MeshBasicMaterial({ 
-            color: this.settings.tree.lineColor 
+            color: this.parseCSSColor(this.settings.tree.lineColor) 
         });
         const tube = new THREE.Mesh(tubeGeometry, tubeMaterial);
 
@@ -393,7 +424,7 @@ export class Forest {
     }
     
     addLeafCluster(position, parentGroup, depth, parentDelay = 0, parentDuration = 0) {
-        // Create cluster of circular green leaves
+        // Create cluster of circular leaves
         const clusterSize = this.settings.tree.leafClusterSize;
         
         // Leaves start after parent branch finishes
@@ -410,13 +441,16 @@ export class Forest {
             growthDuration: leafDuration
         };
         
+        // Get the actual color value from CSS variable
+        const leafColor = this.parseCSSColor(this.settings.tree.leafColor);
+        
         for (let i = 0; i < clusterSize; i++) {
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.random() * 0.3;
             
             const leafGeometry = new THREE.CircleGeometry(this.settings.tree.leafRadius, 8);
             const leafMaterial = new THREE.MeshBasicMaterial({ 
-                color: this.settings.tree.leafColor,
+                color: leafColor,
                 side: THREE.DoubleSide
             });
             const leaf = new THREE.Mesh(leafGeometry, leafMaterial);
@@ -432,6 +466,35 @@ export class Forest {
         }
         
         parentGroup.add(leafGroup);
+    }
+    
+    parseCSSColor(cssValue) {
+        // Handle theme-specific color objects
+        if (typeof cssValue === 'object' && cssValue !== null) {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const themeColor = cssValue[currentTheme];
+            
+            if (themeColor) {
+                return this.parseCSSColor(themeColor);
+            }
+            // Fallback to light theme if specified theme not found
+            return this.parseCSSColor(cssValue.light || cssValue.dark || '#000000');
+        }
+        
+        if (cssValue.startsWith('var(--')) {
+            // Extract variable name
+            const varName = cssValue.replace('var(', '').replace(')', '').trim();
+            // Get computed value from document
+            const computedValue = getComputedStyle(document.documentElement).getPropertyValue(varName);
+            
+            if (computedValue) {
+                // Convert CSS color to THREE.js color
+                return new THREE.Color(computedValue.trim());
+            }
+        }
+        
+        // Fallback to default parsing (hex, rgb, etc.)
+        return new THREE.Color(cssValue);
     }
     
     animate() {
@@ -624,6 +687,7 @@ export class Forest {
         }
         
         window.removeEventListener('resize', this.handleResize);
+        window.removeEventListener('themechange', this.handleThemeChange);
         
         // Dispose all trees
         this.trees.forEach(treeData => {

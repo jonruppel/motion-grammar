@@ -80,7 +80,6 @@ export class BlobIK {
     renderSingleFrame(forceResize = false) {
         if (this.canvas) {
             this.canvas.style.animation = 'none';
-            this.canvas.style.opacity = this.settings.camera.canvasOpacity;
         }
         
         if (forceResize && this.container) {
@@ -112,7 +111,6 @@ export class BlobIK {
             
             if (this.canvas) {
                 this.canvas.style.animation = 'none';
-                this.canvas.style.opacity = this.settings.camera.canvasOpacity;
             }
             
             if (this.container) {
@@ -193,13 +191,6 @@ export class BlobIK {
         // Don't add GUI controls (removed for cleaner experience)
         // this.setupGUI();
         
-        // Remove CSS animation after initial fade-in
-        setTimeout(() => {
-            if (this.canvas) {
-                this.canvas.style.animation = 'none';
-                this.canvas.style.opacity = this.settings.camera.canvasOpacity;
-            }
-        }, 1600);
     }
     
     createBoundaryBox() {
