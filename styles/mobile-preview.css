@@ -1,0 +1,809 @@
+/* Mobile Preview Mode - iPhone Mockup */
+
+/* Only show mobile preview on desktop (768px and above) */
+@media (min-width: 768px) {
+    /* Ensure mobile preview toggle is visible at 768px+ */
+    .mobile-preview-toggle {
+        display: flex !important;
+    }
+    
+    /* Mobile Preview Container */
+    .mobile-preview-active {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--spacing-3xl) var(--spacing-xl);
+        background: var(--color-bg-secondary);
+        min-height: 100vh;
+        overflow: auto;
+    }
+
+    /* Clickable background wrapper */
+    .mobile-preview-wrapper-outer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-bg-secondary);
+        overflow: auto;
+        padding: var(--spacing-3xl) var(--spacing-xl);
+        cursor: pointer;
+        z-index: 1000;
+        animation: fadeIn 0.4s ease forwards;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Disable page load animations in mockup mode */
+    .mobile-preview-active .app-container,
+    .mobile-preview-active .nav-group,
+    .mobile-preview-active .main-content {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    /* Force app container to be instantly visible */
+    .mobile-preview-active .app-container {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    
+    /* Ensure menu animations still work */
+    .mobile-preview-active .sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        animation: none !important;
+    }
+    
+    .mobile-preview-active .mobile-overlay {
+        transition: opacity 0.3s ease, background var(--transition-theme) !important;
+    }
+    
+    .mobile-preview-active .mobile-menu-toggle .hamburger-inner,
+    .mobile-preview-active .mobile-menu-toggle .hamburger-inner::before,
+    .mobile-preview-active .mobile-menu-toggle .hamburger-inner::after {
+        transition-property: transform, background-color !important;
+        transition-duration: 0.15s, var(--transition-fast) !important;
+        transition-timing-function: ease, ease !important;
+    }
+    
+    .mobile-preview-active .mobile-menu-toggle.hamburger-spin .hamburger-inner {
+        transition-duration: 0.22s !important;
+        transition-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19) !important;
+    }
+    
+    .mobile-preview-active .mobile-menu-toggle.hamburger-spin.active .hamburger-inner {
+        transition-delay: 0.12s !important;
+        transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1) !important;
+    }
+
+    /* Prevent iPhone from triggering background click */
+    .mobile-preview-wrapper-outer .iphone-mockup {
+        cursor: default;
+        pointer-events: auto;
+    }
+
+    /* iPhone Mockup */
+    .iphone-mockup {
+        position: relative;
+        width: 390px;
+        height: 844px;
+        max-height: calc(100vh - var(--spacing-lg) * 2);
+        background: 
+            /* Shine/reflection gradient - more visible */
+            linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.12) 0%, 
+                rgba(255, 255, 255, 0.06) 25%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.1) 75%,
+                rgba(0, 0, 0, 0.15) 100%),
+            /* Main body gradient - more contrast */
+            radial-gradient(ellipse at 30% 30%, #3a3a3c 0%, transparent 70%),
+            linear-gradient(to bottom, 
+                #2c2c2e 0%, 
+                #1c1c1e 20%, 
+                #121212 50%,
+                #0a0a0a 80%, 
+                #000000 100%);
+        border-radius: 55px;
+        padding: 12px;
+        box-shadow: 
+            /* Inner highlight - more visible */
+            inset 0 2px 4px rgba(255, 255, 255, 0.2),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+            /* Visible bezel ring */
+            inset 0 0 0 1px rgba(255, 255, 255, 0.15),
+            inset 0 0 0 2.5px rgba(0, 0, 0, 0.7),
+            /* Outer edge definition */
+            0 0 0 0.5px rgba(0, 0, 0, 0.9),
+            /* Main shadows */
+            0 2px 4px rgba(0, 0, 0, 0.2),
+            0 8px 16px rgba(0, 0, 0, 0.3),
+            0 20px 40px rgba(0, 0, 0, 0.4),
+            0 40px 80px rgba(0, 0, 0, 0.5);
+        transform-origin: center center;
+        background-size: 100% 100%, 100% 100%, 100% 100%;
+        animation: mockupZoomIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    /* Pre-animation state - hidden until canvas is ready */
+    .iphone-mockup-pre-animation {
+        animation: none !important;
+        opacity: 0 !important;
+    }
+    
+    /* Zoom in animation - starts huge and shrinks to size */
+    @keyframes mockupZoomIn {
+        from {
+            transform: scale(4);
+            opacity: 0;
+            border-radius: 0px;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+            border-radius: 55px;
+        }
+    }
+    
+    /* Zoom out animation - expands to fill screen */
+    @keyframes mockupZoomOut {
+        from {
+            transform: scale(1);
+            opacity: 1;
+            border-radius: 55px;
+        }
+        to {
+            transform: scale(4);
+            opacity: 0;
+            border-radius: 0px;
+        }
+    }
+    
+    /* Apply zoom out when exiting */
+    .iphone-mockup.mockup-exiting {
+        animation: mockupZoomOut 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+    }
+    
+    /* Scale down when viewport is too short - less aggressive */
+    @media (max-height: 900px) {
+        .iphone-mockup {
+            max-height: calc(100vh - var(--spacing-md) * 2);
+        }
+    }
+    
+    @media (max-height: 800px) {
+        .iphone-mockup {
+            transform: scale(0.92);
+        }
+    }
+    
+    @media (max-height: 780px) {
+        .iphone-mockup {
+            transform: scale(0.88);
+        }
+    }
+    
+    @media (max-height: 740px) {
+        .iphone-mockup {
+            transform: scale(0.84);
+        }
+    }
+    
+    @media (max-height: 700px) {
+        .iphone-mockup {
+            transform: scale(0.80);
+        }
+    }
+
+    [data-theme="dark"] .iphone-mockup {
+        background: 
+            /* Metallic shine - more visible */
+            linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.6) 0%, 
+                rgba(255, 255, 255, 0.3) 25%, 
+                transparent 50%, 
+                rgba(0, 0, 0, 0.08) 75%,
+                rgba(0, 0, 0, 0.12) 100%),
+            /* Radial highlight for dimension */
+            radial-gradient(ellipse at 30% 30%, #ffffff 0%, transparent 70%),
+            /* Main body gradient - more contrast */
+            linear-gradient(to bottom, 
+                #f5f5f7 0%, 
+                #e8e8ed 20%, 
+                #d2d2d7 50%, 
+                #c7c7cc 80%, 
+                #b8b8bd 100%);
+        box-shadow: 
+            /* Inner highlight - more visible */
+            inset 0 2px 4px rgba(255, 255, 255, 0.7),
+            inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+            /* Visible bezel ring */
+            inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+            inset 0 0 0 2.5px rgba(0, 0, 0, 0.12),
+            /* Outer edge definition */
+            0 0 0 0.5px rgba(0, 0, 0, 0.2),
+            /* Main shadows */
+            0 2px 4px rgba(0, 0, 0, 0.1),
+            0 8px 16px rgba(0, 0, 0, 0.15),
+            0 20px 40px rgba(0, 0, 0, 0.2),
+            0 40px 80px rgba(0, 0, 0, 0.25);
+        background-size: 100% 100%, 100% 100%, 100% 100%;
+    }
+
+    /* Screen */
+    .iphone-screen {
+        width: 100%;
+        height: 100%;
+        background: var(--color-bg-primary);
+        border-radius: 48px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 
+            /* Inner bezel - more visible */
+            inset 0 0 0 1.5px rgba(0, 0, 0, 0.2),
+            inset 0 2px 6px rgba(0, 0, 0, 0.25),
+            inset 0 -1px 2px rgba(255, 255, 255, 0.05),
+            /* Outer edge glow */
+            0 0 1px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dynamic Island (Modern pill-shaped cutout) */
+    .iphone-notch {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 126px;
+        height: 37px;
+        background: #000000;
+        border-radius: 25px;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 0 12px;
+        box-shadow: 
+            inset 0 1px 2px rgba(255, 255, 255, 0.05),
+            0 2px 8px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+    }
+
+    [data-theme="dark"] .iphone-notch {
+        background: #1a1a1c;
+    }
+
+    /* Camera (left side of Dynamic Island) */
+    .iphone-camera {
+        width: 10px;
+        height: 10px;
+        background: radial-gradient(circle, rgba(100, 100, 100, 0.8) 0%, rgba(0, 0, 0, 0.9) 70%);
+        border-radius: 50%;
+        box-shadow: 
+            inset 0 1px 1px rgba(255, 255, 255, 0.1),
+            0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    }
+
+    /* Speaker (center/right of Dynamic Island) */
+    .iphone-speaker {
+        width: 60px;
+        height: 5px;
+        background: linear-gradient(90deg, 
+            rgba(40, 40, 40, 0.6) 0%, 
+            rgba(60, 60, 60, 0.4) 50%, 
+            rgba(40, 40, 40, 0.6) 100%);
+        border-radius: 3px;
+        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Side Buttons */
+    .iphone-button {
+        position: absolute;
+        background: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 60%),
+            linear-gradient(90deg, #000000 0%, #1a1a1c 20%, #2c2c2e 50%, #1a1a1c 80%, #000000 100%);
+        border-radius: 2px;
+        box-shadow: 
+            inset 0 1px 2px rgba(255, 255, 255, 0.2),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.5),
+            inset 1px 0 2px rgba(0, 0, 0, 0.4),
+            inset -1px 0 1px rgba(255, 255, 255, 0.1),
+            0 1px 2px rgba(0, 0, 0, 0.5);
+        background-size: 100% 100%, 100% 100%;
+    }
+
+    [data-theme="dark"] .iphone-button {
+        background: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 40%, transparent 60%),
+            linear-gradient(90deg, #aeaeb2 0%, #c7c7cc 20%, #d2d2d7 50%, #c7c7cc 80%, #aeaeb2 100%);
+        box-shadow: 
+            inset 0 1px 2px rgba(255, 255, 255, 0.7),
+            inset 0 -1px 2px rgba(0, 0, 0, 0.2),
+            inset 1px 0 2px rgba(0, 0, 0, 0.15),
+            inset -1px 0 1px rgba(255, 255, 255, 0.4),
+            0 1px 2px rgba(0, 0, 0, 0.2);
+        background-size: 100% 100%, 100% 100%;
+    }
+
+    .iphone-button.power {
+        right: -3px;
+        top: 180px;
+        width: 4px;
+        height: 90px;
+        background: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 60%),
+            linear-gradient(180deg, #000000 0%, #1a1a1c 20%, #2c2c2e 50%, #1a1a1c 80%, #000000 100%);
+        background-size: 100% 100%, 100% 100%;
+    }
+
+    [data-theme="dark"] .iphone-button.power {
+        background: 
+            linear-gradient(to right, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 40%, transparent 60%),
+            linear-gradient(180deg, #aeaeb2 0%, #c7c7cc 20%, #d2d2d7 50%, #c7c7cc 80%, #aeaeb2 100%);
+        background-size: 100% 100%, 100% 100%;
+    }
+
+    .iphone-button.volume-up {
+        left: -3px;
+        top: 150px;
+        width: 3px;
+        height: 50px;
+    }
+
+    .iphone-button.volume-down {
+        left: -3px;
+        top: 210px;
+        width: 3px;
+        height: 50px;
+    }
+
+    .iphone-button.mute {
+        left: -3px;
+        top: 100px;
+        width: 3px;
+        height: 30px;
+    }
+
+    /* Scrollable Content Area */
+    .iphone-content {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+        position: relative;
+    }
+    
+    /* Ensure theme controls are positioned relative to iPhone content */
+    .mobile-preview-active .iphone-content {
+        position: relative;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .iphone-content::-webkit-scrollbar {
+        width: 0;
+        background: transparent;
+    }
+
+    /* Ensure content respects the iPhone boundaries */
+    .mobile-preview-active .iphone-content {
+        position: relative;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Allow app container to scroll properly */
+    .mobile-preview-active .app-container {
+        height: 100%;
+        overflow: visible;
+    }
+
+    /* Scale wrapper for actual content */
+    .mobile-preview-wrapper {
+        width: 390px;
+        min-height: 100%;
+        transform-origin: top center;
+    }
+
+    /* Force mobile styles in preview mode */
+    .mobile-preview-active .app-container {
+        max-width: 390px;
+        margin: 0;
+    }
+
+    /* Show mobile menu button in preview mode - INSIDE the iPhone */
+    .mobile-preview-active .mobile-menu-toggle {
+        display: flex !important;
+        position: absolute;
+        top: calc(37px + var(--spacing-md) + 12px);
+        left: var(--spacing-lg);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        transition: left var(--transition-base), top var(--transition-base), background var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    /* When menu is active in mockup mode, move button to right side like mobile */
+    .mobile-preview-active .mobile-menu-toggle.active {
+        left: calc(280px - 44px - var(--spacing-lg));
+        top: calc(37px + var(--spacing-md) + 12px);
+    }
+
+    /* Show theme controls inside iPhone mockup */
+    .mobile-preview-active .sidebar .theme-controls {
+        display: flex !important;
+        position: static;
+    }
+
+    /* Keep the external theme controls visible outside mockup */
+    body.mobile-preview-active > .theme-controls {
+        display: none;
+    }
+
+    .mobile-preview-active .main-content {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .mobile-preview-active .content-body {
+        padding: var(--spacing-lg);
+        padding-top: calc(37px + 12px + 44px + var(--spacing-lg));
+    }
+    
+    /* Home hero adjustments for mockup view - match mobile styles */
+    .mobile-preview-active .home-hero {
+        margin-top: calc(-1 * (37px + 12px + 44px + var(--spacing-lg)));
+        margin-bottom: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        /* Edge-to-edge width like mobile */
+        width: 100vw !important;
+        max-width: 100vw !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        border-radius: 0 !important;
+    }
+    
+    .mobile-preview-active .hero-frame {
+        padding: var(--spacing-2xl) var(--spacing-lg) !important;
+        padding-top: calc(var(--spacing-2xl) + 100px) !important;
+    }
+    
+    /* Hero text sizing for mockup - match mobile */
+    .mobile-preview-active .home-title {
+        font-size: 40px !important;
+        max-width: 100% !important;
+    }
+    
+    .mobile-preview-active .home-subtitle {
+        font-size: 18px !important;
+        max-width: 100% !important;
+    }
+    
+    /* Reset card padding in mockup */
+    .mobile-preview-active .experience-cards {
+        padding: 0 var(--spacing-lg) !important;
+    }
+
+    /* Make app-container relative for absolute positioning inside */
+    .mobile-preview-active .app-container {
+        position: relative;
+        min-height: 100%;
+    }
+
+    .mobile-preview-active .page-title {
+        font-size: var(--font-size-xl);
+    }
+
+    /* Adjust grid layouts for mobile */
+    .mobile-preview-active .product-grid,
+    .mobile-preview-active .experience-cards,
+    .mobile-preview-active .principles-grid {
+        grid-template-columns: 1fr !important;
+        gap: var(--spacing-md);
+    }
+
+    /* Stack checkout layout */
+    .mobile-preview-active .checkout-container {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Adjust form layouts */
+    .mobile-preview-active .form-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Task Management specific adjustments for mockup mode */
+    .mobile-preview-active .task-experience .experience-intro {
+        margin-bottom: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .task-experience .experience-demo {
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .task-dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .task-dashboard-title {
+        font-size: var(--font-size-xl);
+    }
+
+    .mobile-preview-active .task-create-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mobile-preview-active .task-filters {
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .task-filter-btn {
+        flex: 1;
+        justify-content: center;
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-xs);
+    }
+
+    .mobile-preview-active .flow-steps {
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .flow-step {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: var(--font-size-xs);
+        gap: 4px;
+    }
+
+    .mobile-preview-active .flow-step i {
+        font-size: 16px;
+    }
+
+    .mobile-preview-active .flow-arrow {
+        font-size: var(--font-size-base);
+    }
+
+    .mobile-preview-active .task-item {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+
+    .mobile-preview-active .task-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .mobile-preview-active .task-actions {
+        opacity: 1;
+    }
+
+    .mobile-preview-active .modal-overlay {
+        padding: var(--spacing-sm);
+    }
+
+    .mobile-preview-active .modal-header,
+    .mobile-preview-active .modal-body,
+    .mobile-preview-active .modal-footer {
+        padding: var(--spacing-lg);
+    }
+
+    .mobile-preview-active .experience-annotation {
+        margin-top: var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+
+    .mobile-preview-active .experience-annotation-text {
+        font-size: var(--font-size-xs);
+    }
+
+    /* Hide desktop-only elements */
+    .mobile-preview-active .experience-annotation {
+        display: none;
+    }
+
+    /* Mobile navigation */
+    .mobile-preview-active .mobile-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-md);
+        background: var(--color-bg-elevated);
+        border-bottom: 1px solid var(--color-border-light);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .mobile-preview-active .mobile-nav-logo {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        color: var(--color-text-primary);
+    }
+
+    .mobile-preview-active .mobile-nav-menu {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--color-btn-secondary);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .mobile-preview-active .mobile-nav-menu:hover {
+        background: var(--color-btn-secondary-hover);
+    }
+
+    /* Mobile Preview Badge */
+    .mobile-preview-badge {
+        position: fixed;
+        bottom: var(--spacing-xl);
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--color-bg-contrast);
+        color: var(--color-text-inverse);
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: 20px;
+        z-index: 1001;
+        pointer-events: none;
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+        z-index: 10000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        pointer-events: none;
+        animation: badgeFadeIn 0.6s ease 0.4s forwards;
+        opacity: 0;
+    }
+    
+    @keyframes badgeFadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    /* Move theme controls inside the iPhone, hide mobile preview toggle */
+    .mobile-preview-active .theme-controls {
+        position: absolute;
+        top: calc(37px + var(--spacing-md) + 12px);  /* Below the notch (12px is notch top position) */
+        right: var(--spacing-md);
+        z-index: 9999;
+    }
+    
+    /* Hide mobile preview toggle in mockup mode */
+    .mobile-preview-active .mobile-preview-toggle {
+        display: none !important;
+    }
+    
+    /* Ensure theme toggle is visible and properly styled */
+    .mobile-preview-active .theme-toggle {
+        display: flex !important;
+    }
+
+    /* Mobile sidebar in preview mode - slides in INSIDE the iPhone */
+    .mobile-preview-active .sidebar {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 280px;
+        height: 100%;
+        z-index: 9998;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(-100%) !important;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    .mobile-preview-active .sidebar.mobile-open {
+        transform: translateX(0) !important;
+    }
+    
+    /* Add padding to sidebar header for Dynamic Island and close button */
+    .mobile-preview-active .sidebar-header {
+        padding-top: calc(37px + var(--spacing-lg) + var(--spacing-xs));
+        padding-right: calc(44px + var(--spacing-lg));
+    }
+    
+    /* Ensure logo text wraps properly when menu is open */
+    .mobile-preview-active .sidebar.mobile-open .logo {
+        padding-right: var(--spacing-xs);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        max-width: 100%;
+    }
+    
+    /* Ensure nav items are always visible in mockup mode */
+    .mobile-preview-active .nav-group > .nav-items {
+        max-height: 2000px !important;
+    }
+    
+    .mobile-preview-active .nav-group {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    /* Mobile overlay - contained INSIDE the iPhone */
+    .mobile-preview-active .mobile-overlay {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0);
+        z-index: 9997;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease, background var(--transition-theme);
+    }
+
+    .mobile-preview-active .mobile-overlay.active {
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* Hide mobile preview on actual mobile devices and disable mockup mode */
+@media (max-width: 767px) {
+    .mobile-preview-toggle {
+        display: none !important;
+    }
+
+    .mobile-preview-badge {
+        display: none !important;
+    }
+    
+    /* Disable mockup mode - return to normal mobile view */
+    body.mobile-preview-active {
+        /* Remove mockup mode class effects */
+    }
+    
+    .mobile-preview-active .iphone-mockup,
+    .mobile-preview-active .mobile-preview-wrapper-outer,
+    .mobile-preview-active .mobile-preview-badge {
+        display: none !important;
+    }
+    
+    /* Restore normal mobile layout */
+    .mobile-preview-active .app-container {
+        position: static !important;
+    }
+}
+

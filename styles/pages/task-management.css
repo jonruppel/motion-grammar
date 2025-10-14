@@ -1,0 +1,323 @@
+/* ============================================
+   Task Management Page Styles
+   Page-specific styles for the task management experience
+   All styles scoped to .task-management-container
+   ============================================ */
+
+.task-management-container {
+    /* Task Dashboard Header */
+    .task-dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--color-border-light);
+    }
+
+    .task-header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    }
+
+    .task-dashboard-title {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin: 0;
+    }
+
+    .task-count {
+        background: var(--color-bg-tertiary);
+        color: var(--color-text-secondary);
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+    }
+
+    /* Task Filters */
+    .task-filters {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--color-border-light);
+        flex-wrap: wrap;
+    }
+
+    .task-filter-btn {
+        position: relative;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        background: transparent;
+        border: 1px solid var(--color-border);
+        border-radius: 50px;
+        font-size: var(--font-size-sm);
+        font-weight: 500;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-base);
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 100%;
+            height: 100%;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 50px;
+            z-index: -1;
+            transition: right var(--transition-base), left 0.3s ease, border 0.3s ease;
+        }
+
+        &:hover {
+            background: var(--color-bg-tertiary);
+            border-color: var(--color-accent);
+            color: var(--color-accent);
+        }
+
+        &.active {
+            color: var(--color-accent) !important;
+            font-weight: var(--font-weight-semibold);
+
+            &::before {
+                right: 0;
+                left: 0;
+                background-color: transparent;
+                border: 1.5px solid var(--color-accent);
+                border-radius: 50px;
+                /* Subtle glow for visibility */
+                box-shadow: 0 1px 4px rgba(var(--color-accent-rgb), 0.15);
+                z-index: -1;
+            }
+        }
+    }
+
+    .filter-count {
+        background: var(--color-bg-tertiary);
+        color: var(--color-text-tertiary);
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+        margin-left: var(--spacing-xs);
+    }
+
+    /* Task List */
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    .task-item {
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-lg);
+        transition: all var(--transition-base);
+        cursor: move;
+        border: 1px solid var(--color-border-light);
+        position: relative;
+        user-select: none;
+    }
+
+    .task-item:hover {
+        border-color: var(--color-border);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .task-item.completed {
+        opacity: 0.7;
+        background: var(--color-bg-tertiary);
+        border-color: var(--color-border);
+    }
+
+    .task-item.dragging {
+        opacity: 0.8;
+        transform: rotate(5deg);
+        z-index: 10;
+    }
+
+    .task-item.drop-above::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--color-accent);
+        z-index: 5;
+    }
+
+    .task-item.drop-below::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--color-accent);
+        z-index: 5;
+    }
+
+    .task-item-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .task-checkbox {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        margin-right: var(--spacing-md);
+    }
+
+    .task-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+
+    .task-title {
+        font-size: var(--font-size-base);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        margin: 0;
+    }
+
+    .task-item.completed .task-title {
+        text-decoration: line-through;
+        opacity: 0.7;
+    }
+
+    .task-meta {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+    }
+
+    .task-category {
+        background: var(--color-bg-tertiary);
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .task-priority {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+    }
+
+    .task-priority.high {
+        border: 1px solid var(--color-accent);
+        color: var(--color-accent);
+    }
+
+    .task-priority.medium {
+        border: 1px solid var(--ecom-warning);
+        color: var(--ecom-warning);
+    }
+
+    .task-priority.low {
+        border: 1px solid var(--color-text-secondary);
+        color: var(--color-text-secondary);
+    }
+
+    .task-due-date {
+        font-size: var(--font-size-xs);
+        color: var(--color-text-tertiary);
+    }
+
+    .task-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        align-items: center;
+    }
+
+    .task-action-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+
+        &:hover {
+            background: var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+        }
+    }
+
+    .task-action-btn.edit:hover {
+        color: var(--color-accent);
+    }
+
+    .task-action-btn.delete:hover {
+        color: var(--ecom-danger);
+    }
+
+    /* Modal Styles */
+    .modal-container {
+        max-width: 500px;
+    }
+
+    .modal-body {
+        padding: var(--spacing-xl);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-md);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .task-filters {
+            flex-wrap: wrap;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .task-item-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+        }
+
+        .task-meta {
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+        }
+
+        .task-actions {
+            margin-top: var(--spacing-sm);
+        }
+    }
+}
+

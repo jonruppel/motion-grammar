@@ -1,0 +1,174 @@
+/* ============================================
+   Experiences - Shared Page Styles
+   Scoped utilities for all experience pages
+   ============================================ */
+
+/* Root experience container */
+.experience {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--spacing-xl);
+    padding-right: var(--spacing-xl);
+}
+
+/* Intro block (title + description) */
+.experience-intro {
+    margin: var(--spacing-2xl) 0 var(--spacing-xl) 0;
+}
+
+.experience-intro h2 {
+    margin: 0 0 var(--spacing-sm) 0;
+    color: var(--color-text-primary);
+}
+
+.experience-intro p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    max-width: 760px;
+}
+
+/* Generic section wrapper */
+.experience-section {
+    margin: var(--spacing-2xl) 0;
+}
+
+/* Principles grid (homepage and shared) */
+.principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.principle-card {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+}
+
+.principle-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+}
+
+.principle-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-tertiary);
+    color: var(--color-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+/* Demo/annotation blocks used by experiences (e.g., ecommerce, tasks) */
+.experience-demo {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+}
+
+.experience-annotation {
+    background: rgba(var(--color-accent-rgb), 0.04);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.12);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    margin-top: var(--spacing-xl);
+    position: relative;
+    overflow: hidden;
+}
+
+.experience-annotation::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: rgba(var(--color-accent-rgb), 0.3);
+}
+
+.experience-annotation-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-accent);
+    margin: 0 0 var(--spacing-xs) 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.experience-annotation-text {
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    margin: 0;
+}
+
+/* Coming Soon placeholder (used by ContentManager) */
+.coming-soon-container {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-lg);
+}
+
+.coming-soon-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    background: var(--color-bg-tertiary);
+    color: var(--color-accent);
+    font-size: 36px;
+}
+
+.coming-soon-title {
+    margin: 0;
+    text-align: center;
+}
+
+.coming-soon-description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    text-align: center;
+}
+
+.coming-soon-details {
+    width: 100%;
+    max-width: 720px;
+}
+
+.coming-soon-details h4 {
+    margin: 0 0 var(--spacing-sm) 0;
+}
+
+.coming-soon-details ul {
+    margin: 0;
+    padding-left: var(--spacing-lg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .experience {
+        padding-left: var(--spacing-sm);
+        padding-right: var(--spacing-sm);
+    }
+    .experience-intro {
+        margin: var(--spacing-xl) 0 var(--spacing-lg) 0;
+    }
+    .experience-demo {
+        padding: var(--spacing-md);
+    }
+}
+
+

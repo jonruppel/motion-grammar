@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Grammar - Jon Ruppel</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles/global.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/experiences.css">
+    <link rel="stylesheet" href="styles/mobile-preview.css">
+</head>
+<body>
+    <!-- Loading Sequence -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-circle">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle class="loader-ring" cx="50" cy="50" r="45"/>
+            </svg>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-toggle hamburger hamburger-spin" id="mobileMenuToggle" aria-label="Toggle navigation">
+            <span class="hamburger-box">
+                <span class="hamburger-inner"></span>
+            </span>
+        </button>
+
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay"></div>
+
+        <!-- Left Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <h1 class="logo">Motion<br>Grammar</h1>
+                    <p class="logo-author">by Jon Ruppel</p>
+                </div>
+            </div>
+            <div class="nav-content">
+                <!-- Navigation will be dynamically generated -->
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="theme-controls">
+                <button class="mobile-preview-toggle" id="mobilePreviewToggle" aria-label="Toggle mobile preview" title="Mobile Preview">
+                    <i class='bx bx-mobile'></i>
+                </button>
+                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle Theme">
+                    <i class='bx bx-sun'></i>
+                </button>
+            </div>
+            <div class="hero-container">
+                <!-- Hero will be dynamically mounted here when on homepage -->
+            </div>
+            <div class="content-header">
+                <h1 class="page-title">Motion<br>Grammar</h1>
+                <p class="page-description">Complete product experiences demonstrating holistic motion and interaction design</p>
+            </div>
+            <div class="content-body">
+                <!-- Content will be dynamically loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Three.js and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    
+    <!-- dat.GUI for controls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.9/dat.gui.min.js"></script>
+    
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.6.1/gsap.min.js"></script>
+    
+    <!-- Load modules -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
+

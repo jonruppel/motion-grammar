@@ -1,0 +1,125 @@
+/* ============================================
+   Visualizations Page Styles
+   Page-specific styles for visualization experiences
+   (Lava Lamp, Blob IK, etc.)
+   ============================================ */
+
+.visualization-container {
+    position: relative;
+    height: calc(100vh - var(--spacing-md) * 2); /* Full height minus margins (top and bottom) */
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: #0a0a0a; /* Match hero dark background */
+    box-sizing: border-box;
+}
+
+/* Desktop - width handled by parent container */
+@media (min-width: 769px) {
+    /* Width constraints handled by main-content container */
+}
+
+/* Mobile - edge to edge */
+@media (max-width: 768px) {
+    .visualization-container {
+        height: 100vh; /* Full height on mobile */
+        border-radius: 0;
+        margin: 0;
+    }
+}
+
+/* Refresh button for visualizations */
+.viz-refresh-btn {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.viz-refresh-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: rotate(90deg) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.viz-refresh-btn:active {
+    transform: rotate(90deg) scale(0.95);
+}
+
+.viz-refresh-btn i {
+    font-size: 24px;
+    color: #000;
+}
+
+/* Coming Soon placeholder styles */
+.coming-soon-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-3xl);
+    text-align: center;
+
+    .coming-soon-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--color-accent) 0%, #667eea 100%);
+        border-radius: 50%;
+        margin-bottom: var(--spacing-xl);
+
+        i {
+            font-size: 48px;
+            color: white;
+        }
+    }
+
+    .coming-soon-title {
+        font-size: var(--font-size-2xl);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-primary);
+        margin: 0 0 var(--spacing-md) 0;
+    }
+
+    .coming-soon-description {
+        font-size: var(--font-size-base);
+        color: var(--color-text-secondary);
+        margin-bottom: var(--spacing-2xl);
+        line-height: 1.6;
+    }
+
+    .coming-soon-details {
+        text-align: left;
+        padding: var(--spacing-xl);
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-xl);
+
+        h4 {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--color-text-primary);
+        }
+
+        ul {
+            margin: 0;
+            padding-left: var(--spacing-lg);
+            color: var(--color-text-secondary);
+        }
+
+        li {
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.6;
+        }
+    }
+}
+

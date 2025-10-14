@@ -1,0 +1,20 @@
+{
+  "name": "motion-grammar",
+  "version": "1.0.0",
+  "description": "Motion Grammar - A comprehensive exploration of motion design principles and interaction patterns",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "motion-design",
+    "interaction-design",
+    "product-ux",
+    "design-systems",
+    "user-experience"
+  ],
+  "author": "Jon Ruppel",
+  "license": "MIT"
+}
+

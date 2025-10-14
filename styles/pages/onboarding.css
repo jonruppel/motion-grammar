@@ -1,0 +1,501 @@
+/* ============================================
+   Onboarding Page Styles
+   Page-specific styles for the user onboarding flow
+   All styles scoped to .onboarding-experience
+   ============================================ */
+
+.onboarding-experience {
+    /* Main Container */
+    .onboarding-container {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-xl);
+    }
+
+    /* Desktop: Sidebar on left (1/3) + Content on right (2/3) */
+    @media (min-width: 1024px) {
+        .onboarding-container {
+            flex-direction: row;
+            align-items: flex-start;
+            gap: var(--spacing-2xl);
+        }
+    }
+
+    /* Left Sidebar Navigation (Desktop only) */
+    .step-sidebar {
+        display: none;
+
+        .sidebar-header {
+            padding: var(--spacing-xl);
+            background: var(--color-bg-secondary);
+            border-radius: var(--radius-xl);
+
+            h3 {
+                font-size: var(--font-size-xl);
+                font-weight: var(--font-weight-bold);
+                color: var(--color-text-primary);
+                margin: 0 0 var(--spacing-xs) 0;
+            }
+
+            p {
+                font-size: var(--font-size-sm);
+                color: var(--color-text-secondary);
+                margin: 0;
+            }
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .step-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xl);
+            width: 33.333%;
+            flex-shrink: 0;
+            position: sticky;
+            top: var(--spacing-xl);
+        }
+    }
+
+    /* Step Navigation */
+    .step-nav {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        padding: var(--spacing-xl);
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-xl);
+    }
+
+    /* Horizontal Breadcrumb (Mobile only) */
+    .step-breadcrumb {
+        display: flex;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-md);
+        background: var(--color-bg-secondary);
+        border-radius: var(--radius-lg);
+        overflow-x: auto;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .step-breadcrumb {
+            display: none;
+        }
+    }
+
+    .breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        flex-shrink: 0;
+        white-space: nowrap;
+
+        &:hover {
+            background: var(--color-bg-tertiary);
+        }
+
+        &.active {
+            background: var(--color-bg-primary);
+
+            .breadcrumb-icon {
+                background: var(--color-accent);
+                color: var(--color-text-on-accent);
+            }
+        }
+
+        &.completed {
+            .breadcrumb-icon {
+                background: var(--color-accent);
+                color: var(--color-text-on-accent);
+
+                & > i:first-child {
+                    transform: translateY(-40px);
+                }
+            }
+
+            .breadcrumb-check {
+                transform: translateY(0);
+            }
+        }
+    }
+
+    .breadcrumb-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-md);
+        background: var(--color-bg-tertiary);
+        color: var(--color-text-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+        transition: all var(--transition-fast);
+
+        i {
+            transition: transform 0.3s ease;
+        }
+    }
+
+    .breadcrumb-check {
+        position: absolute;
+        font-size: 20px;
+        transform: translateY(40px);
+        transition: transform 0.3s ease;
+    }
+
+    .breadcrumb-label {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-medium);
+        color: var(--color-text-primary);
+    }
+
+    /* Content Window with Mask */
+    .content-window {
+        flex: 1;
+        width: 100%;
+    }
+
+    @media (min-width: 1024px) {
+        .content-window {
+            width: 66.666%;
+        }
+    }
+
+    .content-mask {
+        overflow: hidden;
+        border-radius: var(--radius-xl);
+        background: var(--color-bg-secondary);
+        position: relative;
+    }
+
+    /* Steps Content - slides within mask */
+    .steps-content {
+        position: relative;
+        width: 100%;
+    }
+
+    .step-content-wrapper {
+        display: none;
+        flex-direction: column;
+        gap: var(--spacing-xl);
+        width: 100%;
+
+        &[data-step="0"] {
+            display: flex;
+        }
+
+        /* Active wrapper is in document flow, others are absolutely positioned */
+        &.active {
+            position: relative;
+        }
+
+        &:not(.active) {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    }
+
+    /* Onboarding Cards */
+    .onboarding-card {
+        background: transparent;
+        border-radius: var(--radius-xl);
+        padding: var(--spacing-3xl);
+        opacity: 0;
+        transform: scale(0.95);
+        width: 100%;
+
+        &.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        h2 {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+            text-align: center;
+            margin: 0 0 var(--spacing-md) 0;
+        }
+
+        & > p {
+            font-size: var(--font-size-lg);
+            color: var(--color-text-secondary);
+            text-align: center;
+            margin: 0 auto var(--spacing-2xl);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+    }
+
+    .card-icon-large {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, var(--color-accent) 0%, #667eea 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin: 0 auto var(--spacing-xl);
+    }
+
+    /* Welcome Step - Feature Grid */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-2xl);
+
+        /* Feature cards using Card component */
+        .card {
+            text-align: center;
+            border: 2px solid var(--color-border);
+            transition: all var(--transition-fast);
+
+            &:hover {
+                border-color: var(--color-accent);
+                transform: translateY(-4px);
+            }
+        }
+    }
+
+    .feature-card-icon {
+        font-size: 32px;
+        color: var(--color-accent);
+        margin-bottom: var(--spacing-md);
+        display: block;
+    }
+
+    /* Profile Step */
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-2xl);
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 2px solid var(--color-border);
+
+        i {
+            font-size: 32px;
+            color: var(--color-accent);
+        }
+
+        h3 {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-text-primary);
+            margin: 0;
+        }
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-xl);
+    }
+
+    /* Preferences Step */
+    .preferences-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+    }
+
+    .preference-card {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-lg);
+        background: var(--color-bg-primary);
+        border: 2px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        transition: all var(--transition-fast);
+
+        &:hover {
+            border-color: var(--color-accent);
+        }
+    }
+
+    .pref-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        background: var(--color-bg-tertiary);
+        color: var(--color-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .pref-content {
+        flex: 1;
+    }
+
+    .pref-title {
+        font-size: var(--font-size-md);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-primary);
+        margin-bottom: 2px;
+    }
+
+    .pref-desc {
+        font-size: var(--font-size-sm);
+        color: var(--color-text-secondary);
+    }
+
+    /* Complete Step */
+    .completion-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--color-accent) 0%, #667eea 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 60px;
+        margin: 0 auto var(--spacing-xl);
+    }
+
+    .completion-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-xl);
+        margin: var(--spacing-3xl) 0;
+
+        /* StatCard components in completion stats */
+        .stat-card {
+            border: 2px solid var(--color-border);
+        }
+
+        .stat-card__value {
+            font-size: var(--font-size-3xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-accent);
+        }
+
+        .stat-card__label {
+            font-size: var(--font-size-sm);
+        }
+    }
+
+    /* Step Actions */
+    .step-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        padding: var(--spacing-xl);
+        background: transparent;
+        border-top: 2px solid var(--color-border);
+        margin-top: auto;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .btn-large {
+        padding: var(--spacing-lg) var(--spacing-2xl);
+        font-size: var(--font-size-lg);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .feature-grid,
+        .profile-grid,
+        .preferences-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .onboarding-card {
+            padding: var(--spacing-2xl);
+        }
+
+        .step-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* Landscape orientation optimization */
+    @media (min-width: 1024px) and (max-height: 800px) {
+        .onboarding-card {
+            padding: var(--spacing-2xl);
+
+            h2 {
+                font-size: var(--font-size-2xl);
+            }
+        }
+
+        .card-icon-large,
+        .completion-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 32px;
+        }
+    }
+}
+
+/* Mobile Preview Mockup Specific Styles */
+.mobile-preview-active .onboarding-experience {
+    .onboarding-container {
+        flex-direction: column;
+    }
+
+    .step-sidebar {
+        display: none;
+    }
+
+    .step-breadcrumb {
+        display: flex;
+    }
+
+    .content-window {
+        width: 100%;
+    }
+
+    .onboarding-card {
+        padding: var(--spacing-2xl);
+
+        h2 {
+            font-size: var(--font-size-2xl);
+        }
+    }
+
+    .feature-grid,
+    .profile-grid,
+    .preferences-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .step-actions {
+        flex-direction: column;
+    }
+
+    .card-icon-large,
+    .completion-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 32px;
+    }
+
+    .completion-stats {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+}
