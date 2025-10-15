@@ -308,9 +308,10 @@ input, select, textarea, label {
 
 /* App Container */
 .app-container {
-    display: flex;
+    position: relative;
     min-height: 100vh;
     width: 100%;
+    overflow: hidden;
 }
 
 /* Hide default scrollbars everywhere */
@@ -482,186 +483,6 @@ button.btn-secondary:disabled {
     padding: var(--spacing-3xl) 0;
 }
 
-/* ===== FORMS AND INPUTS ===== */
-
-/* Standard form input and select styling */
-.form-input,
-.form-select,
-input.form-input,
-select.form-select {
-    width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-bg-secondary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    font-size: var(--font-size-base);
-    color: var(--color-text-primary);
-    font-family: var(--font-family);
-    transition: all var(--transition-fast);
-}
-
-.form-input:focus,
-.form-select:focus,
-input.form-input:focus,
-select.form-select:focus {
-    outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
-}
-
-.form-input:disabled,
-.form-select:disabled,
-input.form-input:disabled,
-select.form-select:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Form groups and labels */
-.form-group {
-    margin-bottom: var(--spacing-md);
-}
-
-.form-label,
-label.form-label {
-    display: block;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-xs);
-}
-
-/* Icons in forms and modals */
-.form-group i,
-.form-label i,
-.modal-body i,
-.form-input i {
-    color: var(--color-text-primary);
-}
-
-/* Date input calendar picker icon */
-.form-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="date"].form-input::-webkit-calendar-picker-indicator {
-    filter: invert(0);
-    opacity: 0.8;
-    cursor: pointer;
-}
-
-[data-theme="dark"] .form-input[type="date"]::-webkit-calendar-picker-indicator,
-[data-theme="dark"] input[type="date"].form-input::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.8;
-}
-
-/* Form row for side-by-side fields */
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-md);
-}
-
-@media (max-width: 768px) {
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ===== MODALS ===== */
-
-/* Modal overlay (backdrop) */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: var(--spacing-lg);
-}
-
-/* Modal container */
-.modal-container {
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-lg);
-    width: 100%;
-    max-width: 500px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
-/* Modal header */
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-xl);
-    border-bottom: 1px solid var(--color-border-light);
-}
-
-.modal-header h3 {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-    margin: 0;
-}
-
-/* Modal close button */
-.modal-close {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.modal-close:hover {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
-}
-
-.modal-close i {
-    font-size: 24px;
-}
-
-/* Modal body */
-.modal-body {
-    padding: var(--spacing-xl);
-}
-
-/* Modal footer */
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-md);
-    padding: var(--spacing-xl);
-    border-top: 1px solid var(--color-border-light);
-}
-
-/* Mobile modal adjustments */
-@media (max-width: 768px) {
-    .modal-overlay {
-        padding: var(--spacing-sm);
-    }
-    
-    .modal-header,
-    .modal-body,
-    .modal-footer {
-        padding: var(--spacing-lg);
-    }
-}
-
 /* ===== CARDS & PANELS ===== */
 
 /* Standard card component */
@@ -780,46 +601,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
     color: var(--color-text-secondary);
 }
 
-/* ===== PROGRESS INDICATORS ===== */
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: var(--color-bg-tertiary);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--color-accent);
-    border-radius: 4px;
-    transition: width var(--transition-base);
-}
-
-.progress-steps {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.progress-step {
-    flex: 1;
-    height: 4px;
-    background: var(--color-bg-tertiary);
-    border-radius: 2px;
-    transition: all var(--transition-fast);
-}
-
-.progress-step.completed {
-    background: var(--color-accent);
-}
-
-.progress-step.active {
-    background: var(--color-accent);
-    height: 6px;
-}
-
 /* ===== LISTS ===== */
 
 .list-item {
@@ -904,35 +685,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
     .grid-4 {
         grid-template-columns: 1fr;
     }
-}
-
-/* ===== EMPTY STATES ===== */
-
-.empty-state {
-    text-align: center;
-    padding: var(--spacing-3xl) var(--spacing-xl);
-}
-
-.empty-state-icon {
-    font-size: 64px;
-    color: var(--color-text-tertiary);
-    margin-bottom: var(--spacing-lg);
-}
-
-.empty-state-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-    margin-bottom: var(--spacing-sm);
-}
-
-.empty-state-description {
-    font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
-    margin-bottom: var(--spacing-xl);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 /* ===== ANIMATIONS ===== */

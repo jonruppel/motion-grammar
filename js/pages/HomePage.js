@@ -1,17 +1,17 @@
 /**
  * HomePage Component
- * Complete home page with hero, experience cards, and principle section
+ * Simplified home page with full-page hero and random visualization background
  */
-import { Hero, CardGrid, Section } from '../components/index.js';
+import { Hero } from '../components/index.js';
+import { visualizationRegistry } from '../utils/visualization-registry.js';
 
 export class HomePage {
     constructor() {
         this.hero = null;
-        this.experienceGrid = null;
-        this.principleGrid = null;
-        this.principleSection = null;
         this.components = [];
         this.stylesLoaded = false;
+        this.visualization = null;
+        this.visualizationContainer = null;
         
         // Start loading page-specific styles
         this.styleLoadPromise = this.loadPageStyles();
@@ -35,7 +35,7 @@ export class HomePage {
         return new Promise((resolve, reject) => {
             const link = document.createElement('link');
             link.id = styleId;
-            link.rel = 'stylesheet';
+            link.rel = 'stylesheet'; 
             link.href = './styles/pages/home.css';
             
             // Wait for stylesheet to load
@@ -61,67 +61,9 @@ export class HomePage {
             await this.styleLoadPromise;
         }
     }
-
-    /**
-     * Experience cards data
-     */
-    static get experienceCards() {
-        return [
-            {
-                icon: 'bx-task',
-                title: 'Task Management System',
-                description: 'A complete workflow from creating tasks to organizing and completing them. Demonstrates timing hierarchy, spatial relationships, and satisfying feedback patterns.',
-                meta: ['🎯 Full User Flow', '⚡ Motion System'],
-                dataset: { nav: 'exp-tasks' }
-            },
-            {
-                icon: 'bx-cart',
-                title: 'E-Commerce Checkout',
-                description: 'Browse to purchase journey with product detail, cart management, and checkout flow. Shows how motion builds confidence and reduces anxiety during transactions.',
-                meta: ['🛍️ Complete Flow', '💳 Multi-Step'],
-                dataset: { nav: 'exp-ecommerce' }
-            },
-            {
-                icon: 'bx-bar-chart-alt-2',
-                title: 'Analytics Dashboard',
-                description: 'Data visualization with progressive loading, drill-down interactions, and smooth transitions between views. Demonstrates choreography and data morphing patterns.',
-                meta: ['📊 Data Viz', '🎭 Choreography'],
-                dataset: { nav: 'exp-dashboard' }
-            },
-            {
-                icon: 'bx-cloud-rain',
-                title: 'Weather Experience',
-                description: 'Real-time weather visualization with smooth animations and delightful micro-interactions. Shows how motion can make data feel alive and engaging.',
-                meta: ['☀️ Real-time Data', '🌈 Visual Design'],
-                dataset: { nav: 'exp-weather' }
-            },
-            {
-                icon: 'bx-user-plus',
-                title: 'User Onboarding',
-                description: 'Multi-step setup flow with progress indication, validation feedback, and preview states. Shows how motion can make complex processes feel simple and achievable.',
-                meta: ['📝 Multi-Step', '✨ Progressive'],
-                dataset: { nav: 'exp-onboarding' }
-            },
-            {
-                icon: 'bx-line-chart',
-                title: 'Stock Market Dashboard',
-                description: 'Real-time stock market data with interactive charts and smooth transitions. Demonstrates how motion can help users track and understand complex financial data.',
-                meta: ['📈 Financial Data', '⚡ Real-time Updates'],
-                dataset: { nav: 'exp-stocks' }
-            }
-        ];
-    }
-
-    /**
-     * Principle cards data
-     */
-    static get principleCards() {
-        return [];
-    }
-
     
     /**
-     * Render home page with hero separate from content
+     * Render home page with full-page hero and random visualization
      */
     renderSeparate(onCardClick) {
         // Hero (rendered separately, higher in DOM hierarchy)
@@ -132,27 +74,64 @@ export class HomePage {
         this.components.push(this.hero);
         const heroElement = this.hero.render();
 
-        // Content container (everything else)
+        // Load random visualization as background
+        this.loadRandomVisualization(heroElement);
+
+        // Empty content container (no grid needed)
         const contentContainer = document.createElement('div');
         contentContainer.className = 'experience';
-
-        // Experience cards
-        this.experienceGrid = new CardGrid({
-            cards: HomePage.experienceCards,
-            variant: 'experience',
-            onCardClick: (cardData) => {
-                if (onCardClick && cardData.dataset && cardData.dataset.nav) {
-                    onCardClick(cardData.dataset.nav);
-                }
-            }
-        });
-        this.components.push(this.experienceGrid);
-        contentContainer.appendChild(this.experienceGrid.render());
 
         return {
             heroElement,
             contentElement: contentContainer
         };
+    }
+
+    /**
+     * Load a random visualization as the hero background
+     */
+    async loadRandomVisualization(heroElement) {
+        try {
+            // Get all available visualizations
+            const allVisualizations = visualizationRegistry.getAll();
+            
+            if (allVisualizations.length === 0) {
+                console.warn('No visualizations available');
+                return;
+            }
+
+            // Pick a random visualization
+            const randomIndex = Math.floor(Math.random() * allVisualizations.length);
+            const selectedViz = allVisualizations[randomIndex];
+            
+            console.log(`Loading random visualization: ${selectedViz.title}`);
+
+            // Create visualization container
+            this.visualizationContainer = document.createElement('div');
+            this.visualizationContainer.className = 'home-visualization-container';
+            this.visualizationContainer.style.position = 'absolute';
+            this.visualizationContainer.style.top = '0';
+            this.visualizationContainer.style.left = '0';
+            this.visualizationContainer.style.width = '100vw';
+            this.visualizationContainer.style.height = '100vh';
+            this.visualizationContainer.style.zIndex = '0';
+            this.visualizationContainer.style.pointerEvents = 'none';
+
+            // Insert before hero-frame to be behind text
+            const heroFrame = heroElement.querySelector('.hero-frame');
+            if (heroFrame) {
+                heroElement.insertBefore(this.visualizationContainer, heroFrame);
+            } else {
+                heroElement.appendChild(this.visualizationContainer);
+            }
+
+            // Load and initialize the visualization
+            const VisualizationClass = await visualizationRegistry.getVisualizationClass(selectedViz.id);
+            this.visualization = new VisualizationClass(this.visualizationContainer);
+            
+        } catch (error) {
+            console.error('Failed to load random visualization:', error);
+        }
     }
 
     /**
@@ -173,66 +152,15 @@ export class HomePage {
                 this.hero.animateTitle();
                 this.hero.animateSubtitle();
             });
-
-            // Hide experience grid initially
-            if (this.experienceGrid && this.experienceGrid.element) {
-                gsap.set(this.experienceGrid.element, { opacity: 0 });
-            }
         }
-
-        // Setup GSAP hover effects on cards
-        requestAnimationFrame(() => {
-            if (this.experienceGrid && this.experienceGrid.element) {
-                window.setupGSAPHovers(this.experienceGrid.element, '.experience-card');
-            }
-        });
     }
 
     /**
-     * Collapse hero and reveal cards
+     * Keep hero fullscreen (no collapse needed)
      */
     async collapseHero(isFirstLoad = false) {
-        // Ensure styles are loaded before calculating dimensions
-        await this.waitForStyles();
-        
-        const delay = 600;
-        
-        setTimeout(() => {
-            if (this.hero && this.hero.element) {
-                // Get current margins to calculate available height
-                const computedStyle = window.getComputedStyle(this.hero.element);
-                const marginTop = parseFloat(computedStyle.marginTop) || 0;
-                const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-                
-                // Calculate 80% of available height (viewport minus margins)
-                const availableHeight = window.innerHeight - marginTop - marginBottom;
-                const targetHeight = availableHeight * 0.8;
-                
-                const tl = gsap.timeline();
-                
-                // Animate height collapse only
-                // Width is handled by the hero-container in CSS
-                tl.to(this.hero.element, {
-                    height: targetHeight,
-                    duration: 1.0,
-                    ease: 'expo.inOut'
-                }, 0);
-                
-                // Clean up after animations complete
-                // No props to clear - height stays set, layout is handled by CSS
-                tl.call(() => {
-                    // Callback for potential future use
-                });
-                
-                // Reveal experience grid after hero collapse
-                tl.call(() => {
-                    if (this.experienceGrid && this.experienceGrid.element) {
-                        gsap.set(this.experienceGrid.element, { opacity: 1 });
-                        this.experienceGrid.triggerScaleReveal();
-                    }
-                }, null, 0.5); // Start cards 0.5s after hero collapse begins
-            }
-        }, delay);
+        // Hero stays fullscreen - no collapse animation
+        // This method is kept for API compatibility but does nothing
     }
 
     /**
@@ -246,6 +174,14 @@ export class HomePage {
      * Cleanup
      */
     destroy() {
+        // Cleanup visualization
+        if (this.visualization && typeof this.visualization.dispose === 'function') {
+            this.visualization.dispose();
+        }
+        this.visualization = null;
+        this.visualizationContainer = null;
+
+        // Cleanup components
         this.components.forEach(component => {
             if (component && typeof component.destroy === 'function') {
                 component.destroy();
@@ -253,8 +189,6 @@ export class HomePage {
         });
         this.components = [];
         this.hero = null;
-        this.experienceGrid = null;
-        // Remove principle references
     }
 }
 

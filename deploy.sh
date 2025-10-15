@@ -15,7 +15,6 @@ cp -r js zips/js/
 cp -r styles zips/styles/
 cp -r images zips/images/
 cp index.html zips/index.html
-cp README.md zips/README.md
 
 echo "✅ Files packaged for deployment"
 

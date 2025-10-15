@@ -17,17 +17,24 @@ const VISUALIZATION_MANIFEST = [
     },
     {
         id: 'viz-network',
-        title: 'Blob Network',
+        title: 'Tumble Dweebs',
         description: '2D IK system with visible connections',
         module: () => import('../visualizations/blob-ik.js'),
         className: 'BlobIK'
     },
     {
         id: 'viz-forest',
-        title: 'Forest',
+        title: 'Into the Woods',
         description: 'Infinite forest of Munari-style trees moving from horizon to foreground',
         module: () => import('../visualizations/forest.js'),
         className: 'Forest'
+    },
+    {
+        id: 'viz-block-roller',
+        title: 'Block and Roll',
+        description: 'Rolling blocks with physics and collision detection',
+        module: () => import('../visualizations/block-roller.js'),
+        className: 'BlockRoller'
     }
     // Add more visualizations here as needed!
 ];

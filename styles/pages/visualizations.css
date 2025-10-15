@@ -5,33 +5,36 @@
    ============================================ */
 
 .visualization-container {
-    position: relative;
-    height: calc(100vh - var(--spacing-md) * 2); /* Full height minus margins (top and bottom) */
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    background: var(--color-bg-primary); /* Match hero dark background */
-    box-sizing: border-box;
-}
-
-/* Desktop - width handled by parent container */
-@media (min-width: 769px) {
-    /* Width constraints handled by main-content container */
-}
-
-/* Mobile - edge to edge */
-@media (max-width: 768px) {
-    .visualization-container {
-        height: 100vh; /* Full height on mobile */
-        border-radius: 0;
-        margin: 0;
-    }
-}
-
-/* Refresh button for visualizations */
-.viz-refresh-btn {
     position: absolute;
-    top: var(--spacing-lg);
-    right: var(--spacing-lg);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--color-bg-primary);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Remove all media queries and ensure fullscreen on all devices */
+.visualization-container canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Disable scrolling */
+body.visualization-active {
+    overflow: hidden;
+}
+
+/* Refresh button positioning */
+.viz-refresh-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -42,7 +45,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    z-index: 10;
+    z-index: 1000;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 

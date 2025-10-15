@@ -174,48 +174,19 @@ export class Hero extends Component {
     }
 
     /**
-     * Set fullscreen dimensions (for initial state)
-     * Hero-frame handles padding/spacing, so we only set structural dimensions here
+     * Set fullscreen dimensions - now handled by CSS
+     * Kept for API compatibility but does nothing
      */
     setFullscreen(isFirstLoad = false) {
-        if (!this.element || !window.gsap) return;
-        
-        // Get computed margin values (CSS var(--spacing-md) resolves to pixels)
-        const computedStyle = window.getComputedStyle(this.element);
-        const marginTop = parseFloat(computedStyle.marginTop) || 0;
-        const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-        
-        // Calculate initial height accounting for actual margin values
-        // Height = viewport height - top margin - bottom margin
-        const initialHeight = window.innerHeight - marginTop - marginBottom;
-        
-        // Only set height and preserve margins
-        // Display/layout properties are now handled by CSS on .home-hero and .hero-frame
-        gsap.set(this.element, {
-            height: initialHeight
-        });
+        // Height is now 100% via CSS - no JS needed
     }
 
     /**
-     * Set to collapsed size (80% of available height)
-     * Used when navigating back to homepage (not first load)
+     * Set to collapsed size - now handled by CSS
+     * Kept for API compatibility but does nothing
      */
     setCollapsed() {
-        if (!this.element || !window.gsap) return;
-        
-        // Get computed margin values
-        const computedStyle = window.getComputedStyle(this.element);
-        const marginTop = parseFloat(computedStyle.marginTop) || 0;
-        const marginBottom = parseFloat(computedStyle.marginBottom) || 0;
-        
-        // Calculate 80% of available height (viewport minus margins)
-        const availableHeight = window.innerHeight - marginTop - marginBottom;
-        const collapsedHeight = availableHeight * 0.8;
-        
-        // Set height directly without animation
-        gsap.set(this.element, {
-            height: collapsedHeight
-        });
+        // Height is now 100% via CSS - no JS needed
     }
 
     /**

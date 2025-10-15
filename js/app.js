@@ -3,8 +3,6 @@
 import { Navigation } from './core/navigation.js';
 import { ContentManager } from './core/content-manager.js';
 import { navigationData } from './core/navigation.js';
-import { mobileBreakpointTrigger } from './utils/mobile-breakpoint-trigger.js';
-import { mobileViewManager } from './utils/mobile-view-manager.js';
 
 class App {
     constructor() {
@@ -12,6 +10,9 @@ class App {
         this.contentManager = null;
         this.isReady = false;
         this.isFirstLoad = true;
+        this.isTransitioning = false;
+        this.modules = [];
+        this.currentModuleIndex = 0;
     }
 
     // Helper to find module path by experience ID
@@ -69,29 +70,13 @@ class App {
         const heroContainer = document.querySelector('.hero-container');
         this.contentManager = new ContentManager(headerElement, bodyElement, heroContainer);
 
-        // Connect navigation to content
+        // Connect navigation to content manager
         this.navigation.onNavigate = (itemId, modulePath) => {
             this.loadExperience(itemId, modulePath);
         };
 
         // Setup theme toggle
         this.setupThemeToggle();
-
-        // Initialize mobile view manager (handles mobile styles for both screen size and mockup)
-        // This watches for window resize and mockup mode changes
-        setTimeout(() => {
-            mobileViewManager.init();
-        }, 50); // Initialize early to avoid flash of wrong styles
-
-        // Initialize mobile breakpoint trigger (process stylesheets once)
-        // This scans all CSS for mobile breakpoints and prepares to inject them
-        // Navigation rules are excluded - they have special handling
-        setTimeout(() => {
-            mobileBreakpointTrigger.processStylesheets();
-        }, 100); // Small delay to ensure all stylesheets are loaded
-
-        // Setup mobile preview
-        this.setupMobilePreview();
 
         // Setup mobile menu
         this.setupMobileMenu();
@@ -112,6 +97,9 @@ class App {
             }
         }
 
+        // Build module list for scroll navigation FIRST
+        this.buildModuleList();
+
         // Handle URL navigation (load initial content) - active state already set above
         await this.handleUrlNavigation();
 
@@ -124,6 +112,10 @@ class App {
         // Setup resize handler to manage nav state across breakpoints
         this.setupResizeHandler();
 
+        // Setup scroll and swipe navigation
+        this.setupScrollNavigation();
+        this.setupSwipeNavigation();
+
         // Mark first load as complete
         this.isFirstLoad = false;
 
@@ -131,6 +123,10 @@ class App {
     }
 
     async loadExperience(itemId, modulePath) {
+        // Find the target index
+        const targetIndex = this.modules.findIndex(m => m.id === itemId);
+        if (targetIndex === -1) return;
+
         // Update URL
         const url = new URL(window.location);
         url.searchParams.set('experience', itemId);
@@ -152,14 +148,18 @@ class App {
             }
         }, 0);
 
-        // Load content
-        await this.contentManager.loadExperience(itemId, modulePath);
+        // Navigate with transition based on direction
+        await this.navigateToModuleByIndex(targetIndex);
 
         // Close mobile menu
         this.closeMobileMenu();
     }
 
     async loadFromUrl(itemId, modulePath) {
+        // Find the target index
+        const targetIndex = this.modules.findIndex(m => m.id === itemId);
+        if (targetIndex === -1) return;
+
         // Update active nav
         this.navigation.setActive(itemId);
 
@@ -176,8 +176,8 @@ class App {
             }
         }, 0);
 
-        // Load content
-        await this.contentManager.loadExperience(itemId, modulePath);
+        // Navigate with transition based on direction
+        await this.navigateToModuleByIndex(targetIndex);
 
         // Close mobile menu
         this.closeMobileMenu();
@@ -196,17 +196,19 @@ class App {
                 if (!this.isFirstLoad) {
                     this.navigation.setActive(experienceId);
                 }
-                // Load content
+                // Load the experience
                 await this.contentManager.loadExperience(experienceId, modulePath);
                 return;
             }
         }
 
-        // Clear active nav state for homepage
-        this.navigation.setActive(null);
-
-        // Show welcome screen
-        await this.contentManager.showWelcome(this.isFirstLoad);
+        // No URL parameter - load random visualization on first load (without setting URL)
+        if (this.isFirstLoad && this.modules.length > 0) {
+            const randomModule = this.modules[this.currentModuleIndex];
+            
+            this.navigation.setActive(randomModule.id);
+            await this.contentManager.loadExperience(randomModule.id, randomModule.module);
+        }
     }
 
     setupThemeToggle() {
@@ -231,257 +233,6 @@ class App {
                 detail: { theme: newTheme }
             }));
         });
-    }
-
-    setupMobilePreview() {
-        const toggle = document.getElementById('mobilePreviewToggle');
-        if (!toggle) return;
-
-        this.mobilePreviewToggle = toggle;
-        this.outsideClickHandler = null;
-
-        toggle.addEventListener('click', () => {
-            const isMobilePreview = toggle.classList.contains('active');
-            
-            if (!isMobilePreview) {
-                this.enableMobilePreview(toggle);
-            } else {
-                this.disableMobilePreview(toggle);
-            }
-        });
-        
-        // Handle window resize - exit mockup mode if resizing below 768px
-        this.handleMobilePreviewResize();
-        window.addEventListener('resize', () => this.handleMobilePreviewResize());
-    }
-    
-    handleMobilePreviewResize() {
-        const toggle = document.getElementById('mobilePreviewToggle');
-        if (!toggle) return;
-        
-        const isMobilePreview = toggle.classList.contains('active');
-        const isBelowBreakpoint = window.innerWidth < 768;
-        
-        // If we're in mockup mode and resize below 768px, exit mockup mode
-        if (isMobilePreview && isBelowBreakpoint) {
-            this.disableMobilePreview(toggle);
-        }
-    }
-
-    enableMobilePreview(toggle) {
-        // Add active class to toggle button
-        toggle.classList.add('active');
-
-        // Pause animation carousel during transition for performance
-        if (this.contentManager?.animationCarousel) {
-            this.contentManager.animationCarousel.pause();
-        }
-        
-        // Pause current mood experience during transition for performance
-        if (this.contentManager?.currentModule && typeof this.contentManager.currentModule.pause === 'function') {
-            this.contentManager.currentModule.pause();
-        }
-
-        // Close any open mobile menu first
-        this.closeMobileMenu();
-
-        // Get the body element
-        const body = document.body;
-        
-        // Store original classes
-        body.dataset.originalClass = body.className;
-        
-        // Add mobile preview class
-        // This triggers both mockup styles AND all mobile breakpoint styles
-        body.classList.add('mobile-preview-active');
-
-        // Create iPhone mockup structure
-        const appContainer = document.querySelector('.app-container');
-        const mainContent = document.querySelector('.main-content');
-        
-        // Create wrapper for click-outside functionality
-        const wrapper = document.createElement('div');
-        wrapper.className = 'mobile-preview-wrapper-outer';
-        wrapper.id = 'mobilePreviewWrapper';
-        
-        // Create mockup container (start hidden to allow canvas to render first)
-        const mockupContainer = document.createElement('div');
-        mockupContainer.className = 'iphone-mockup iphone-mockup-pre-animation';
-        mockupContainer.innerHTML = `
-            <div class="iphone-button power"></div>
-            <div class="iphone-button volume-up"></div>
-            <div class="iphone-button volume-down"></div>
-            <div class="iphone-button mute"></div>
-            <div class="iphone-screen">
-                <div class="iphone-notch">
-                    <div class="iphone-speaker"></div>
-                    <div class="iphone-camera"></div>
-                </div>
-                <div class="iphone-content" id="iphoneContent"></div>
-            </div>
-        `;
-
-        // Nest mockup in wrapper
-        wrapper.appendChild(mockupContainer);
-
-        // Insert wrapper and move content
-        body.insertBefore(wrapper, body.firstChild);
-        
-        // Move app container into iPhone screen
-        const iphoneContent = document.getElementById('iphoneContent');
-        iphoneContent.appendChild(appContainer);
-        
-        // Render canvas frames, then start mockup animation
-        if (this.contentManager?.animationCarousel) {
-            // Use requestAnimationFrame to ensure DOM has fully updated
-            requestAnimationFrame(() => {
-                // Force resize check before rendering to match new container size
-                this.contentManager.animationCarousel.renderSingleFrame(true);
-                
-                // Wait for canvas to fully render before starting mockup animation
-                setTimeout(() => {
-                    requestAnimationFrame(() => {
-                        mockupContainer.classList.remove('iphone-mockup-pre-animation');
-                    });
-                }, 100); // Small delay to ensure canvas is visible
-            });
-        } else {
-            // No animation carousel, start animation immediately
-            requestAnimationFrame(() => {
-                mockupContainer.classList.remove('iphone-mockup-pre-animation');
-            });
-        }
-
-        // Add preview badge
-        const badge = document.createElement('div');
-        badge.className = 'mobile-preview-badge';
-        badge.textContent = 'Mobile Preview • 390×844';
-        body.appendChild(badge);
-
-        // Add click handler to close menu when clicking outside iPhone
-        this.setupOutsideClickHandler(mockupContainer);
-        
-        // Resume animation carousel after transition completes (100ms delay + 0.6s animation)
-        setTimeout(() => {
-            // Use requestAnimationFrame to ensure DOM has fully settled
-            requestAnimationFrame(() => {
-                if (this.contentManager?.animationCarousel) {
-                    this.contentManager.animationCarousel.resume();
-                }
-                
-                // Resume current mood experience after transition completes
-                if (this.contentManager?.currentModule && typeof this.contentManager.currentModule.resume === 'function') {
-                    this.contentManager.currentModule.resume();
-                }
-            });
-        }, 750); // Wait for 100ms delay + 650ms mockup zoom-in animation
-    }
-
-    setupOutsideClickHandler(mockupContainer) {
-        // Get the wrapper element
-        const wrapper = document.getElementById('mobilePreviewWrapper');
-        if (!wrapper) return;
-
-        // Listen for clicks anywhere in the wrapper
-        this.outsideClickHandler = (e) => {
-            const mockup = document.querySelector('.iphone-mockup');
-            const toggle = document.getElementById('mobilePreviewToggle');
-            
-            // Check if click is outside the mockup (exit mobile preview mode)
-            if (mockup && !mockup.contains(e.target)) {
-                // Exit mobile preview mode entirely
-                this.disableMobilePreview(toggle);
-            }
-        };
-
-        // Add click handler to the wrapper
-        wrapper.addEventListener('click', this.outsideClickHandler);
-    }
-
-    disableMobilePreview(toggle) {
-        // Remove active class from toggle button
-        toggle.classList.remove('active');
-        
-        // Pause animation carousel during transition for performance
-        if (this.contentManager?.animationCarousel) {
-            this.contentManager.animationCarousel.pause();
-        }
-        
-        // Pause current mood experience during transition for performance
-        if (this.contentManager?.currentModule && typeof this.contentManager.currentModule.pause === 'function') {
-            this.contentManager.currentModule.pause();
-        }
-
-        const body = document.body;
-        const appContainer = document.querySelector('.app-container');
-        const wrapper = document.getElementById('mobilePreviewWrapper');
-        const badge = document.querySelector('.mobile-preview-badge');
-        const mockup = document.querySelector('.iphone-mockup');
-
-        // Remove outside click handler
-        if (this.outsideClickHandler) {
-            const wrapperElement = document.getElementById('mobilePreviewWrapper');
-            if (wrapperElement) {
-                wrapperElement.removeEventListener('click', this.outsideClickHandler);
-            }
-            this.outsideClickHandler = null;
-        }
-
-        // Trigger zoom out animation
-        if (mockup) {
-            mockup.classList.add('mockup-exiting');
-        }
-
-        // Wait for animation to complete before removing elements
-        setTimeout(() => {
-            // Disable transitions temporarily for instant switch
-            if (appContainer) {
-                appContainer.style.transition = 'none';
-                appContainer.style.animation = 'none';
-            }
-
-            // Move app container back to body
-            if (appContainer && wrapper) {
-                body.insertBefore(appContainer, body.firstChild);
-            }
-            
-            // Render a single frame immediately after DOM move to prevent black canvas
-            if (this.contentManager?.animationCarousel) {
-                // Use requestAnimationFrame to ensure DOM has fully updated
-                requestAnimationFrame(() => {
-                    // Force resize check before rendering to match new container size
-                    this.contentManager.animationCarousel.renderSingleFrame(true);
-                });
-            }
-
-            // Remove wrapper and badge
-            if (wrapper) wrapper.remove();
-            if (badge) badge.remove();
-
-            // Remove mobile preview class (removes mockup styles and mobile breakpoint styles)
-            body.classList.remove('mobile-preview-active');
-
-            // Re-enable transitions after a frame
-            if (appContainer) {
-                requestAnimationFrame(() => {
-                    appContainer.style.transition = '';
-                    appContainer.style.animation = '';
-                });
-            }
-            
-            // Resume animation carousel after exit transition completes
-            // Use requestAnimationFrame to ensure DOM has fully settled
-            requestAnimationFrame(() => {
-                if (this.contentManager?.animationCarousel) {
-                    this.contentManager.animationCarousel.resume();
-                }
-                
-                // Resume current mood experience after exit transition completes
-                if (this.contentManager?.currentModule && typeof this.contentManager.currentModule.resume === 'function') {
-                    this.contentManager.currentModule.resume();
-                }
-            });
-        }, 500); // Match animation duration
     }
 
     setupMobileMenu() {
@@ -521,50 +272,102 @@ class App {
     setupLogoClick() {
         const logo = document.querySelector('.logo');
         if (logo) {
-            logo.addEventListener('click', () => {
-                // Clear URL parameters
+            logo.addEventListener('click', async () => {
+                // Clear URL
                 window.history.pushState({}, '', window.location.pathname);
                 
-                // Clear active nav state
-                this.navigation.setActive(null);
-                
-                // Direct DOM update to clear all active states
-                setTimeout(() => {
-                    const allNavLinks = document.querySelectorAll('.nav-link');
-                    allNavLinks.forEach(link => link.classList.remove('active'));
-                }, 0);
+                // Show home state overlay
+                await this.showHomeStateOverlay();
                 
                 // Close mobile nav if open
                 this.closeMobileMenu();
-                
-                // Show welcome screen
-                this.contentManager.showWelcome();
             });
         }
+    }
+    
+    async showHomeStateOverlay() {
+        const mainContent = document.querySelector('.main-content');
+        const isDesktop = window.innerWidth > 768;
+        
+        // Create home state overlay
+        const homeOverlay = this.createHomeOverlay();
+        document.body.appendChild(homeOverlay);
+        
+        // Set initial state (hidden)
+        gsap.set(homeOverlay, { opacity: 0 });
+        
+        if (isDesktop) {
+            // Desktop: Fade in overlay, pause, fade out
+            await gsap.to(homeOverlay, {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out'
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 1200));
+            
+            await gsap.to(homeOverlay, {
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.inOut'
+            });
+        } else {
+            // Mobile: Fade in overlay, pause, fade out
+            await gsap.to(homeOverlay, {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out'
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            await gsap.to(homeOverlay, {
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.inOut'
+            });
+        }
+        
+        // Remove overlay
+        homeOverlay.remove();
     }
 
     async animateFirstLoad() {
         const appContainer = document.querySelector('.app-container');
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
+        const heroContainer = document.querySelector('.hero-container');
         const isDesktop = window.innerWidth > 768;
-        const isHomepage = !!document.querySelector('.home-hero');
         const hasVisualization = !!document.querySelector('.visualization-container');
 
-        // Check if app container is already visible (from loading experience on first load)
-        const isAlreadyVisible = appContainer && parseFloat(window.getComputedStyle(appContainer).opacity) === 1;
-        
-        // Fade in app container if not already visible
-        if (!isAlreadyVisible && appContainer) {
-            gsap.to(appContainer, {
-                opacity: 1,
-                duration: 0.6,
-                ease: 'power2.out'
-            });
+        console.log('animateFirstLoad - hasVisualization:', hasVisualization);
+
+        // Fade in app container
+        gsap.to(appContainer, {
+            opacity: 1,
+            duration: 0.6,
+            ease: 'power2.out'
+        });
+
+        // Only show home overlay if we have a visualization loaded
+        if (!hasVisualization) {
+            console.warn('No visualization loaded for home state');
+            // Just show nav
+            if (isDesktop) {
+                gsap.set(sidebar, { x: 0, opacity: 1 });
+            } else {
+                gsap.set(sidebar, { x: '-100%', opacity: 1 });
+            }
+            gsap.set(mainContent, { opacity: 1 });
+            return;
         }
 
-        if (isDesktop && isHomepage) {
-            // DESKTOP HOMEPAGE: Content starts full width, nav slides in and pushes content
+        // Create home state overlay
+        const homeOverlay = this.createHomeOverlay();
+        document.body.appendChild(homeOverlay);
+
+        if (isDesktop) {
+            // DESKTOP: Show visualization, animate in nav and home overlay
             
             // Set initial states
             gsap.set(sidebar, { 
@@ -573,95 +376,119 @@ class App {
             });
             
             gsap.set(mainContent, { 
-                position: 'absolute',
-                right: 0,
-                width: '100%',
-                opacity: 0,
-                y: 20
+                opacity: 1
             });
 
-            // Fade in content at full width
-            await gsap.to(mainContent, {
+            gsap.set(homeOverlay, {
+                opacity: 0
+            });
+
+            // Fade in home overlay
+            await gsap.to(homeOverlay, {
                 opacity: 1,
-                y: 0,
-                duration: 0.6,
+                duration: 0.8,
                 ease: 'power2.out'
             });
 
-            // Wait for cards to finish animating before nav flies in
-            // Match hero collapse delay: 600ms
-            await new Promise(resolve => setTimeout(resolve, 600));
+            // Wait a moment
+            await new Promise(resolve => setTimeout(resolve, 1200));
 
-            // Animate nav in AND resize content simultaneously
-            // Match hero collapse timing: 1.0s duration, expo.inOut ease
-            const tl = gsap.timeline();
-            
-            // Nav slides in
-            tl.to(sidebar, {
+            // Animate nav in
+            await gsap.to(sidebar, {
                 x: 0,
                 opacity: 1,
                 duration: 1.0,
                 ease: 'expo.inOut'
-            }, 0);
-            
-            // Content resizes to accommodate nav (which includes hero-container)
-            tl.to(mainContent, {
-                width: 'calc(100% - 280px)',
-                duration: 1.0,
-                ease: 'expo.inOut'
-            }, 0);
-
-            await tl;
-
-            // Reset to static positioning (let CSS take over)
-            gsap.set(mainContent, {
-                clearProps: 'position,right,width'
             });
 
-        } else if (isDesktop && hasVisualization) {
-            // DESKTOP VISUALIZATION: Nav visible, main content visible for transition
-            // The visualization's revealIn transition will handle the hero animation
-            gsap.set(sidebar, { x: 0, opacity: 1 });
-            
-            // Set main content to visible immediately so transition can be seen
-            gsap.set(mainContent, { opacity: 1 });
+            // Wait another moment
+            await new Promise(resolve => setTimeout(resolve, 800));
 
-        } else if (isDesktop) {
-            // DESKTOP OTHER PAGES: Nav already visible, simple fade in
-            gsap.set(sidebar, { x: 0, opacity: 1 });
+            // Fade out home overlay
+            await gsap.to(homeOverlay, {
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.inOut'
+            });
 
-            await gsap.fromTo(mainContent,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: 'power2.out'
-                }
-            );
+            // Remove overlay
+            homeOverlay.remove();
 
-        } else if (hasVisualization) {
-            // MOBILE VISUALIZATION: Sidebar off-screen, main content visible for transition
-            // The visualization's revealIn transition will handle the hero animation
-            gsap.set(sidebar, { x: '-100%', opacity: 1 });
-            
-            // Set main content to visible immediately so transition can be seen
-            gsap.set(mainContent, { opacity: 1 });
-            
         } else {
-            // MOBILE OTHER PAGES: Simple fade in
+            // MOBILE: Show visualization, animate in home overlay
             gsap.set(sidebar, { x: '-100%', opacity: 1 });
+            gsap.set(mainContent, { opacity: 1 });
+            gsap.set(homeOverlay, { opacity: 0 });
 
-            await gsap.fromTo(mainContent,
-                { opacity: 0, y: 20 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: 0.6,
-                    ease: 'power2.out'
-                }
-            );
+            // Fade in home overlay
+            await gsap.to(homeOverlay, {
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power2.out'
+            });
+
+            // Wait a moment
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Fade out home overlay
+            await gsap.to(homeOverlay, {
+                opacity: 0,
+                duration: 0.6,
+                ease: 'power2.inOut'
+            });
+
+            // Remove overlay
+            homeOverlay.remove();
         }
+    }
+
+    createHomeOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'home-state-overlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            pointer-events: none;
+        `;
+
+        const title = document.createElement('h1');
+        title.textContent = 'Motion Grammar';
+        title.style.cssText = `
+            font-size: 88px;
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin: 0 auto 20px;
+            text-transform: uppercase;
+            color: var(--color-text-primary);
+            text-align: center;
+        `;
+
+        const subtitle = document.createElement('p');
+        subtitle.textContent = 'Dynamic design systems';
+        subtitle.style.cssText = `
+            font-size: 22px;
+            margin: 0 auto;
+            line-height: 1.5;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-primary);
+            text-align: center;
+        `;
+
+        overlay.appendChild(title);
+        overlay.appendChild(subtitle);
+
+        return overlay;
     }
 
     setupResizeHandler() {
@@ -723,6 +550,190 @@ class App {
                 loader.style.display = 'none';
             }, 300);
         }, 500);
+    }
+
+    buildModuleList() {
+        // Only add visualizations - no separate homepage
+        navigationData.forEach(group => {
+            if (group.children) {
+                group.children.forEach(item => {
+                    this.modules.push({
+                        id: item.id,
+                        title: item.title,
+                        module: item.module
+                    });
+                });
+            }
+        });
+
+        console.log('Built module list:', this.modules.length, 'modules');
+
+        // Set current index based on URL or pick random for first load
+        const params = new URLSearchParams(window.location.search);
+        const experienceId = params.get('experience');
+        
+        if (experienceId) {
+            const index = this.modules.findIndex(m => m.id === experienceId);
+            if (index !== -1) {
+                this.currentModuleIndex = index;
+                console.log('Set current index from URL:', this.currentModuleIndex, experienceId);
+            }
+        } else if (this.isFirstLoad) {
+            // Pick a random visualization for first load
+            this.currentModuleIndex = Math.floor(Math.random() * this.modules.length);
+            console.log('Picked random visualization:', this.currentModuleIndex, this.modules[this.currentModuleIndex]);
+        }
+    }
+
+    setupScrollNavigation() {
+        let lastScrollTime = 0;
+        const scrollCooldown = 1000; // 1 second cooldown between scrolls
+
+        console.log('Setting up scroll navigation');
+
+        window.addEventListener('wheel', (e) => {
+            // Prevent default scroll behavior
+            e.preventDefault();
+
+            // Check if we're already transitioning or in cooldown
+            const now = Date.now();
+            if (this.isTransitioning || (now - lastScrollTime) < scrollCooldown) {
+                return;
+            }
+
+            // Only trigger on significant scroll
+            if (Math.abs(e.deltaY) > 10) {
+                lastScrollTime = now;
+                console.log('Scroll detected, deltaY:', e.deltaY);
+                
+                if (e.deltaY > 0) {
+                    // Scroll down - next
+                    console.log('Navigating to next');
+                    this.navigateToNext();
+                } else if (e.deltaY < 0) {
+                    // Scroll up - previous
+                    console.log('Navigating to previous');
+                    this.navigateToPrevious();
+                }
+            }
+        }, { passive: false });
+    }
+
+    setupSwipeNavigation() {
+        let touchStartY = 0;
+        let touchEndY = 0;
+        let lastSwipeTime = 0;
+        const swipeThreshold = 50;
+        const swipeCooldown = 1000; // 1 second cooldown between swipes
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (this.isTransitioning || (now - lastSwipeTime) < swipeCooldown) return;
+
+            touchEndY = e.changedTouches[0].screenY;
+            const swipeDistance = touchStartY - touchEndY;
+
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                lastSwipeTime = now;
+                
+                if (swipeDistance > 0) {
+                    // Swipe up - next
+                    this.navigateToNext();
+                } else {
+                    // Swipe down - previous
+                    this.navigateToPrevious();
+                }
+            }
+        }, { passive: true });
+    }
+
+    async navigateToNext() {
+        // Loop to beginning if at the end
+        const nextIndex = (this.currentModuleIndex + 1) % this.modules.length;
+        await this.navigateToModuleByIndex(nextIndex, 'down');
+    }
+
+    async navigateToPrevious() {
+        // Loop to end if at the beginning
+        const prevIndex = this.currentModuleIndex === 0 
+            ? this.modules.length - 1 
+            : this.currentModuleIndex - 1;
+        await this.navigateToModuleByIndex(prevIndex, 'up');
+    }
+
+    async navigateToModuleByIndex(targetIndex, forcedDirection = null) {
+        if (this.isTransitioning || targetIndex === this.currentModuleIndex) return;
+
+        this.isTransitioning = true;
+        const targetModule = this.modules[targetIndex];
+        
+        // Use forced direction if provided (for scroll/swipe), otherwise calculate from indices
+        const direction = forcedDirection || (targetIndex > this.currentModuleIndex ? 'down' : 'up');
+
+        // Step 1: Slide out current content
+        await this.slideOutContent(direction);
+
+        // Step 2: Load new content while off-screen
+        const url = new URL(window.location);
+        url.searchParams.set('experience', targetModule.id);
+        window.history.pushState({}, '', url);
+        this.navigation.setActive(targetModule.id);
+        
+        // Update nav link active state
+        setTimeout(() => {
+            const allNavLinks = document.querySelectorAll('.nav-link');
+            allNavLinks.forEach(link => link.classList.remove('active'));
+            const targetLink = document.querySelector(`.nav-link[data-item-id="${targetModule.id}"]`);
+            if (targetLink) {
+                targetLink.classList.add('active');
+            }
+        }, 0);
+
+        await this.contentManager.loadExperience(targetModule.id, targetModule.module);
+
+        // Step 3: Slide in new content
+        await this.slideInContent(direction);
+
+        this.currentModuleIndex = targetIndex;
+        this.isTransitioning = false;
+    }
+
+    async slideOutContent(direction) {
+        const mainContent = document.querySelector('.main-content');
+        const heroContainer = document.querySelector('.hero-container');
+        const multiplier = direction === 'down' ? 1 : -1;
+
+        // Slide out current content
+        await gsap.to([mainContent, heroContainer], {
+            y: multiplier * -100,
+            opacity: 0,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
+    }
+
+    async slideInContent(direction) {
+        const mainContent = document.querySelector('.main-content');
+        const heroContainer = document.querySelector('.hero-container');
+        const multiplier = direction === 'down' ? 1 : -1;
+
+        // Position new content off-screen in the opposite direction
+        gsap.set([mainContent, heroContainer], {
+            y: multiplier * 100,
+            opacity: 0
+        });
+
+        // Slide in new content
+        await gsap.to([mainContent, heroContainer], {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'power2.inOut'
+        });
     }
 }
 
