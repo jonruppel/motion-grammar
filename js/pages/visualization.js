@@ -1,32 +1,34 @@
-// Blob Network Visualization
-// 2D IK system with visible connections
+// Unified Visualization Page
+// Dynamically loads visualizations from the registry
 
-import { BlobIK } from '../visualizations/blob-ik.js';
-
-export const header = {
-    title: 'Blob Network',
-    description: '2D IK system with visible connections'
-};
+import { visualizationRegistry } from '../utils/visualization-registry.js';
 
 let visualization = null;
 let container = null;
+let currentVizId = null;
 
-export async function render(containerElement) {
+export async function render(containerElement, vizId = null) {
     // Load page-specific styles and wait for them to load
     await loadPageStyles();
     
     // Return just the visualization container (will be mounted to hero-container)
     const vizContainer = document.createElement('div');
     vizContainer.className = 'visualization-container';
-    vizContainer.id = 'blobNetworkContainer';
+    vizContainer.id = 'unifiedVisualizationContainer';
     
     container = vizContainer;
+    currentVizId = vizId;
     return vizContainer;
 }
 
-export function init(containerElement) {
-    if (container) {
-        visualization = new BlobIK(container);
+export async function init(containerElement) {
+    if (container && currentVizId && visualizationRegistry.has(currentVizId)) {
+        try {
+            const VisualizationClass = await visualizationRegistry.getVisualizationClass(currentVizId);
+            visualization = new VisualizationClass(container);
+        } catch (error) {
+            console.error(`Failed to initialize visualization "${currentVizId}":`, error);
+        }
     }
 }
 
@@ -47,6 +49,7 @@ export function dispose() {
         visualization.dispose();
         visualization = null;
     }
+    currentVizId = null;
 }
 
 // Load page-specific CSS and wait for it to load
@@ -76,4 +79,3 @@ function loadPageStyles() {
         document.head.appendChild(link);
     });
 }
-

@@ -11,8 +11,8 @@ export const BLOB_IK_SETTINGS = {
         count: 15,
         minSize: 0.3,
         maxSize: 1.4,
-        color: "#111111",
-        accentColor: "#ffffff",
+        color: "var(--color-bg-primary)",
+        accentColor: "var(--color-accent)",
         lineOpacity: 0.7,
         lineWidth: 3
     },
@@ -31,7 +31,7 @@ export const BLOB_IK_SETTINGS = {
         canvasOpacity: 1.0
     },
     background: {
-        color: "#2a2a2a"
+        color: "var(--color-bg-secondary)"
     }
 };
 
@@ -74,7 +74,6 @@ export class BlobIK {
     
     pause() {
         this.isPaused = true;
-        console.log('🎨 Blob IK paused');
     }
     
     renderSingleFrame(forceResize = false) {
@@ -89,7 +88,6 @@ export class BlobIK {
             
             if (currentWidth !== this.lastWidth || currentHeight !== this.lastHeight) {
                 this.onResize();
-                console.log('🎨 Blob IK resized before frame render');
             }
         }
         
@@ -99,7 +97,6 @@ export class BlobIK {
             requestAnimationFrame(() => {
                 if (this.renderer) {
                     this.renderer.render(this.scene, this.camera);
-                    console.log('🎨 Blob IK rendered single frame');
                 }
             });
         }
@@ -128,7 +125,6 @@ export class BlobIK {
             }
             
             this.animate();
-            console.log('🎨 Blob IK resumed');
         }
     }
     
@@ -145,7 +141,7 @@ export class BlobIK {
         
         // Setup scene
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(this.settings.background.color);
+        this.scene.background = this.parseCSSColor(this.settings.background.color);
         
         // Setup camera
         this.camera = new THREE.PerspectiveCamera(
@@ -191,6 +187,26 @@ export class BlobIK {
         // Don't add GUI controls (removed for cleaner experience)
         // this.setupGUI();
         
+        // Theme change listener
+        this.themeChangeHandler = this.handleThemeChange.bind(this);
+        window.addEventListener('themechange', this.themeChangeHandler);
+    }
+    
+    handleThemeChange() {
+        // Update scene background
+        this.scene.background = this.parseCSSColor(this.settings.background.color);
+        
+        // Update blob materials
+        this.blobs.forEach(blob => {
+            blob.material.color = this.parseCSSColor(this.settings.blobs.color);
+            if (blob.children.length > 0) {
+                blob.children[0].material.color = this.parseCSSColor(this.settings.blobs.accentColor);
+            }
+            if (blob.children.length > 1) {
+                // Update outline color (second child is the outline)
+                blob.children[1].material.color = this.parseCSSColor("var(--color-border)");
+            }
+        });
     }
     
     createBoundaryBox() {
@@ -222,7 +238,7 @@ export class BlobIK {
     
     createBlobs() {
         const blobCount = this.settings.blobs.count;
-        const blobColor = new THREE.Color(this.settings.blobs.color);
+        const blobColor = this.parseCSSColor(this.settings.blobs.color);
         const minSize = this.settings.blobs.minSize;
         const maxSize = this.settings.blobs.maxSize;
         
@@ -246,7 +262,7 @@ export class BlobIK {
             const indicatorSize = size / 10;
             const indicatorGeometry = new THREE.CircleGeometry(indicatorSize, 16);
             const indicatorMaterial = new THREE.MeshBasicMaterial({
-                color: new THREE.Color(this.settings.blobs.accentColor),
+                color: this.parseCSSColor(this.settings.blobs.accentColor),
                 transparent: false,
                 opacity: 1.0
             });
@@ -259,6 +275,20 @@ export class BlobIK {
             
             // Add indicator as child of blob so it rotates with it
             blob.add(indicator);
+            
+            // Create outline/stroke using text color
+            const outlineGeometry = new THREE.RingGeometry(size, size + 0.1, 32);
+            const outlineMaterial = new THREE.MeshBasicMaterial({
+                color: this.parseCSSColor("var(--color-border)"),
+                transparent: false,
+                opacity: 1.0,
+                side: THREE.FrontSide
+            });
+            const outline = new THREE.Mesh(outlineGeometry, outlineMaterial);
+            outline.position.z = -0.01; // Position behind the blob
+            
+            // Add outline as child of blob so it moves and rotates with it
+            blob.add(outline);
             
             // Position randomly throughout the box - they'll settle and tumble
             blob.position.x = (Math.random() - 0.5) * 8;
@@ -771,6 +801,9 @@ export class BlobIK {
         if (this.canvas && this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
+
+        // Remove theme change listener
+        window.removeEventListener('themechange', this.themeChangeHandler);
     }
 
     setupGUI() {
@@ -869,6 +902,16 @@ export class BlobIK {
         
         // Create new blobs with updated count
         this.createBlobs();
+    }
+
+    parseCSSColor(cssColor) {
+        if (cssColor.startsWith('var(')) {
+            const variableName = cssColor.substring(4, cssColor.length - 1);
+            const element = document.documentElement;
+            const computedStyle = getComputedStyle(element);
+            return new THREE.Color(computedStyle.getPropertyValue(variableName));
+        }
+        return new THREE.Color(cssColor);
     }
 }
 

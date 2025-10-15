@@ -3,6 +3,8 @@
 import { Navigation } from './core/navigation.js';
 import { ContentManager } from './core/content-manager.js';
 import { navigationData } from './core/navigation.js';
+import { mobileBreakpointTrigger } from './utils/mobile-breakpoint-trigger.js';
+import { mobileViewManager } from './utils/mobile-view-manager.js';
 
 class App {
     constructor() {
@@ -26,8 +28,6 @@ class App {
     }
 
     async init() {
-        console.log('🚀 Initializing Design Systems in Motion...');
-
         // Wait for DOM
         if (document.readyState === 'loading') {
             await new Promise(resolve => {
@@ -51,7 +51,6 @@ class App {
             const experienceId = params.get('experience');
             
             if (experienceId) {
-                console.log('Fallback: Setting active state via direct DOM manipulation for', experienceId);
                 // Find all nav links and reset active state
                 const allNavLinks = document.querySelectorAll('.nav-link');
                 allNavLinks.forEach(link => link.classList.remove('active'));
@@ -59,10 +58,7 @@ class App {
                 // Find the matching nav link by data-item-id and add active class
                 const targetLink = document.querySelector(`.nav-link[data-item-id="${experienceId}"]`);
                 if (targetLink) {
-                    console.log('Fallback: Found target link, adding active class:', targetLink);
                     targetLink.classList.add('active');
-                } else {
-                    console.log('Fallback: No matching nav link found for', experienceId);
                 }
             }
         }, 50);
@@ -80,6 +76,19 @@ class App {
 
         // Setup theme toggle
         this.setupThemeToggle();
+
+        // Initialize mobile view manager (handles mobile styles for both screen size and mockup)
+        // This watches for window resize and mockup mode changes
+        setTimeout(() => {
+            mobileViewManager.init();
+        }, 50); // Initialize early to avoid flash of wrong styles
+
+        // Initialize mobile breakpoint trigger (process stylesheets once)
+        // This scans all CSS for mobile breakpoints and prepares to inject them
+        // Navigation rules are excluded - they have special handling
+        setTimeout(() => {
+            mobileBreakpointTrigger.processStylesheets();
+        }, 100); // Small delay to ensure all stylesheets are loaded
 
         // Setup mobile preview
         this.setupMobilePreview();
@@ -119,7 +128,6 @@ class App {
         this.isFirstLoad = false;
 
         this.isReady = true;
-        console.log('✅ App ready');
     }
 
     async loadExperience(itemId, modulePath) {
@@ -133,7 +141,6 @@ class App {
 
         // Direct DOM update for active state
         setTimeout(() => {
-            console.log('loadExperience: Direct DOM update for active state:', itemId);
             // Clear all active states first
             const allNavLinks = document.querySelectorAll('.nav-link');
             allNavLinks.forEach(link => link.classList.remove('active'));
@@ -153,14 +160,11 @@ class App {
     }
 
     async loadFromUrl(itemId, modulePath) {
-        console.log('loadFromUrl called with itemId:', itemId, 'modulePath:', modulePath);
         // Update active nav
-        console.log('loadFromUrl: Calling setActive with', itemId);
         this.navigation.setActive(itemId);
 
         // Direct DOM update for active state
         setTimeout(() => {
-            console.log('loadFromUrl: Direct DOM update for active state:', itemId);
             // Clear all active states first
             const allNavLinks = document.querySelectorAll('.nav-link');
             allNavLinks.forEach(link => link.classList.remove('active'));
@@ -288,6 +292,7 @@ class App {
         body.dataset.originalClass = body.className;
         
         // Add mobile preview class
+        // This triggers both mockup styles AND all mobile breakpoint styles
         body.classList.add('mobile-preview-active');
 
         // Create iPhone mockup structure
@@ -453,7 +458,7 @@ class App {
             if (wrapper) wrapper.remove();
             if (badge) badge.remove();
 
-            // Remove mobile preview class
+            // Remove mobile preview class (removes mockup styles and mobile breakpoint styles)
             body.classList.remove('mobile-preview-active');
 
             // Re-enable transitions after a frame
@@ -525,7 +530,6 @@ class App {
                 
                 // Direct DOM update to clear all active states
                 setTimeout(() => {
-                    console.log('logoClick: Clearing all active states');
                     const allNavLinks = document.querySelectorAll('.nav-link');
                     allNavLinks.forEach(link => link.classList.remove('active'));
                 }, 0);

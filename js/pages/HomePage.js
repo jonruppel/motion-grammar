@@ -119,61 +119,15 @@ export class HomePage {
         return [];
     }
 
-    /**
-     * Render home page (legacy method)
-     */
-    render(onCardClick) {
-        const container = document.createElement('div');
-        container.className = 'experience';
-
-        // Hero
-        this.hero = new Hero({
-            title: 'Motion Grammar',
-            subtitle: 'Explore complete product experiences that demonstrate how motion and interaction systems come together to create cohesive, purposeful user experiences.'
-        });
-        this.components.push(this.hero);
-        container.appendChild(this.hero.render());
-
-        // Experience cards
-        this.experienceGrid = new CardGrid({
-            cards: HomePage.experienceCards,
-            variant: 'experience',
-            onCardClick: (cardData) => {
-                if (onCardClick && cardData.dataset && cardData.dataset.nav) {
-                    onCardClick(cardData.dataset.nav);
-                }
-            }
-        });
-        this.components.push(this.experienceGrid);
-        container.appendChild(this.experienceGrid.render());
-
-        // Principle section
-        this.principleGrid = new CardGrid({
-            cards: HomePage.principleCards,
-            variant: 'principle'
-        });
-        this.components.push(this.principleGrid);
-
-        this.principleSection = new Section({
-            title: 'What Makes This Different?',
-            description: "These aren't isolated component demos. Each experience represents a complete user journey with consistent motion principles, purposeful timing decisions, and clear design rationale. Every animation serves a function: reducing cognitive load, building confidence, maintaining spatial memory, or providing satisfying feedback.",
-            children: [this.principleGrid],
-            marginTop: true
-        });
-        this.components.push(this.principleSection);
-        container.appendChild(this.principleSection.render());
-
-        return container;
-    }
-
+    
     /**
      * Render home page with hero separate from content
      */
     renderSeparate(onCardClick) {
         // Hero (rendered separately, higher in DOM hierarchy)
         this.hero = new Hero({
-            title: 'Motion Grammar',
-            subtitle: 'Explore complete product experiences that demonstrate how motion and interaction systems come together to create cohesive, purposeful user experiences.'
+            title: 'Motion\nGrammar',
+            subtitle: 'Dynamic design systems'
         });
         this.components.push(this.hero);
         const heroElement = this.hero.render();

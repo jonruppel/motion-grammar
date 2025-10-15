@@ -86,23 +86,15 @@ export class NavLink extends Component {
      * Set active state
      */
     setActive(isActive) {
-        console.log('NavLink.setActive called with isActive:', isActive, 'for element:', this.element);
         if (this.element) {
             const link = this.element.querySelector('.nav-link');
-            console.log('NavLink.setActive: Found link element:', link);
             if (link) {
                 if (isActive) {
-                    console.log('NavLink.setActive: Adding active class to', link);
                     link.classList.add('active');
                 } else {
-                    console.log('NavLink.setActive: Removing active class from', link);
                     link.classList.remove('active');
                 }
-            } else {
-                console.log('NavLink.setActive: No .nav-link found in element');
             }
-        } else {
-            console.log('NavLink.setActive: No element available yet');
         }
     }
 }

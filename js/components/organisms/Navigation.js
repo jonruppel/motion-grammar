@@ -64,11 +64,9 @@ export class Navigation extends Component {
      * Set active navigation item
      */
     setActive(itemId) {
-        console.log('Navigation.setActive called with itemId:', itemId);
         this.currentItemId = itemId;
         
         this.navGroups.forEach(navGroup => {
-            console.log('Navigation.setActive: Calling setActiveItem on navGroup with', itemId);
             navGroup.setActiveItem(itemId);
         });
 

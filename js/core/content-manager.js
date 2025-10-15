@@ -72,6 +72,30 @@ export class ContentManager {
         });
     }
 
+    pauseCurrentAnimations() {
+        // Pause animation carousel
+        if (this.animationCarousel) {
+            this.animationCarousel.pause();
+        }
+        
+        // Pause current visualization module
+        if (this.currentModule && typeof this.currentModule.pause === 'function') {
+            this.currentModule.pause();
+        }
+    }
+
+    resumeCurrentAnimations() {
+        // Resume animation carousel
+        if (this.animationCarousel) {
+            this.animationCarousel.resume();
+        }
+        
+        // Resume current visualization module
+        if (this.currentModule && typeof this.currentModule.resume === 'function') {
+            this.currentModule.resume();
+        }
+    }
+
     async loadExperience(itemId, modulePath) {
         if (this.isTransitioning) return;
         this.isTransitioning = true;
@@ -119,6 +143,9 @@ export class ContentManager {
             const hasCurrentHeroContent = this.heroContainer && this.heroContainer.children.length > 0;
             const currentHeroElement = hasCurrentHeroContent ? this.heroContainer.firstElementChild : null;
 
+            // Pause current visualizations and animations during transition
+            this.pauseCurrentAnimations();
+
             // Execute body transition with hero awareness
             await executeTransition(this.bodyElement, currentHeroElement, async () => {
                 try {
@@ -143,7 +170,8 @@ export class ContentManager {
                     
                     // Render the experience (await in case it's async, e.g., visualizations)
                     if (module.render) {
-                        const rendered = await module.render(this.bodyElement);
+                        // Pass itemId as parameter for visualization pages
+                        const rendered = await module.render(this.bodyElement, itemId);
                         
                         // Check if this is a visualization page (returns an element)
                         if (rendered && rendered.nodeType === Node.ELEMENT_NODE) {
@@ -199,6 +227,9 @@ export class ContentManager {
                 });
             }
 
+            // Resume animations after transition completes
+            this.resumeCurrentAnimations();
+
         } finally {
             this.isTransitioning = false;
         }
@@ -222,6 +253,9 @@ export class ContentManager {
             // Check if current page has hero content (homepage or visualization)
             const hasCurrentHeroContent = this.heroContainer && this.heroContainer.children.length > 0;
             const currentHeroElement = hasCurrentHeroContent ? this.heroContainer.firstElementChild : null;
+
+            // Pause current visualizations and animations during transition
+            this.pauseCurrentAnimations();
 
             // Skip reveal animation on first load - just render directly
             if (isFirstLoad) {
@@ -309,28 +343,23 @@ export class ContentManager {
             // This needs to happen after DOM is fully rendered
             requestAnimationFrame(() => {
                 const homeHero = this.homePage ? this.homePage.getHeroElement() : null;
-                console.log('🌋 Initializing animation carousel', { 
-                    hasHero: !!homeHero,
-                    hasCarousel: !!this.animationCarousel 
-                });
                 
                 if (homeHero) {
                     // Clean up old carousel if it exists
                     if (this.animationCarousel) {
-                        console.log('🧹 Cleaning up old animation carousel');
                         this.animationCarousel.dispose();
                         this.animationCarousel = null;
                     }
                     
                     // Create new carousel
                     setTimeout(() => {
-                        console.log('🎭 Creating animation carousel (lava lamp)');
                         this.animationCarousel = new AnimationCarousel(homeHero);
                     }, 100);
-                } else {
-                    console.error('❌ No hero element found for animation carousel!');
                 }
             });
+            
+            // Resume animations after transition completes
+            this.resumeCurrentAnimations();
             
             // Collapse hero after transition (only on first load)
             // On subsequent navigations, hero is already at collapsed size

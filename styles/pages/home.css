@@ -90,13 +90,13 @@
 
 .home-title {
     font-size: 64px; /* Mobile base size (doubled from 32px) */
-    font-weight: 700;
+    font-weight: 900; /* Black weight for maximum impact */
     line-height: 1.1;
     letter-spacing: -0.02em;
     margin: 0 auto var(--spacing-lg);
     perspective: 1000px;
     opacity: 0;
-    white-space: nowrap; /* Keep on one line */
+    text-transform: uppercase;
 }
 
 /* Title becomes visible once JavaScript splits it into letters */
@@ -105,11 +105,13 @@
 }
 
 .home-subtitle {
-    font-size: 21px;
+    font-size: 28px;
     opacity: 0; /* Start hidden - GSAP will animate */
     margin: 0 auto var(--spacing-xl);
     line-height: 1.5;
     font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* Experience Cards - Apple-inspired */
@@ -179,7 +181,7 @@
     }
     
     .home-subtitle {
-        font-size: 18px;
+        font-size: 22px;
         max-width: 500px;
     }
 
@@ -197,7 +199,7 @@
     }
     
     .home-subtitle {
-        font-size: 20px;
+        font-size: 24px;
         max-width: 600px;
     }
 }
@@ -212,7 +214,7 @@
     }
     
     .home-subtitle {
-        font-size: 21px;
+        font-size: 26px;
         max-width: 700px;
     }
 }
@@ -243,7 +245,7 @@
     }
     
     .home-subtitle {
-        font-size: 18px;
+        font-size: 20px;
         max-width: 100%;
     }
 

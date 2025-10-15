@@ -101,10 +101,8 @@ export class NavGroup extends Component {
      * Set active item by id
      */
     setActiveItem(itemId) {
-        console.log('NavGroup.setActiveItem called with itemId:', itemId, 'and', this.navLinks.length, 'links');
         this.navLinks.forEach(navLink => {
             const shouldBeActive = navLink.props.id === itemId;
-            console.log('NavGroup.setActiveItem: Updating link for', navLink.props.id, 'to active:', shouldBeActive);
             navLink.setActive(shouldBeActive);
         });
     }

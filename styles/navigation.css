@@ -32,12 +32,13 @@
 
 .logo {
     font-size: calc(1.5 * var(--font-size-lg));
-    font-weight: var(--font-weight-semibold);
+    font-weight: 900; /* Black weight for maximum impact */
     color: var(--color-text-primary);
     letter-spacing: -0.03em;
     cursor: pointer;
     transition: color var(--transition-fast);
     line-height: 1.2;
+    text-transform: uppercase;
 }
 
 .logo:hover {
@@ -629,8 +630,12 @@
     }
 
     .content-body {
-        padding: var(--spacing-sm);
-        padding-top: 0;
+        padding: var(--spacing-md);
+        padding-top: calc(44px + var(--spacing-md)); /* Menu button height + spacing */
+    }
+    
+    .page-top-spacer {
+        height: 20px !important; /* Reduced from 100px for mobile */
     }
 
     .logo {

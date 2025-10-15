@@ -35,11 +35,11 @@ export class Hero extends Component {
             className: 'hero-frame'
         });
 
-        // Title
+        // Title - convert newlines to <br> tags
         const titleElement = this.createElement('h1', {
-            className: 'home-title',
-            text: title
+            className: 'home-title'
         });
+        titleElement.innerHTML = title.replace(/\n/g, '<br>');
         frame.appendChild(titleElement);
 
         // Subtitle

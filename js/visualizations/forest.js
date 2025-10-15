@@ -41,7 +41,7 @@ export const FOREST_SETTINGS = {
         minOffsetX: 3, // Minimum distance from center (left or right)
         maxOffsetX: 8, // Maximum distance from center
         depthScaling: true, // Scale trees by distance for perspective
-        spawnInterval: 1.0 // Spawn one tree every second
+        spawnInterval: 2.0 // Spawn one tree every two seconds
     },
     growth: {
         enabled: true,
@@ -85,7 +85,6 @@ export class Forest {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
         }
-        console.log('🌲 Forest paused');
     }
     
     renderSingleFrame(forceResize = false) {
@@ -101,7 +100,6 @@ export class Forest {
             // If size changed, trigger resize BEFORE rendering
             if (currentWidth !== this.lastWidth || currentHeight !== this.lastHeight) {
                 this.onResize();
-                console.log('🌲 Forest resized before frame render');
             }
         }
         
@@ -114,7 +112,6 @@ export class Forest {
             requestAnimationFrame(() => {
                 if (this.renderer) {
                     this.renderer.render(this.scene, this.camera);
-                    console.log('🌲 Forest rendered single frame (double render for stability)');
                 }
             });
         }
@@ -143,7 +140,6 @@ export class Forest {
             }
             
             this.animate(); // Restart animation loop
-            console.log('🌲 Forest resumed');
         }
     }
     
@@ -176,10 +172,10 @@ export class Forest {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             alpha: false,
-            antialias: true
+            antialias: false
         });
         this.renderer.setSize(width, height);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.setPixelRatio(1); // Lower pixel ratio for better performance
         
         // Track initial size
         this.lastWidth = width;
@@ -233,11 +229,9 @@ export class Forest {
     spawnTree(z) {
         const group = new THREE.Group();
         
-        // Spawn trees to the left or right of center, never in the middle
-        const side = Math.random() < 0.5 ? -1 : 1;
-        const offsetX = this.settings.forest.minOffsetX + 
-            Math.random() * (this.settings.forest.maxOffsetX - this.settings.forest.minOffsetX);
-        const x = side * offsetX;
+        // Spawn trees anywhere from -maxOffsetX to +maxOffsetX, including center
+        const offsetX = Math.random() * this.settings.forest.maxOffsetX * 2 - this.settings.forest.maxOffsetX;
+        const x = offsetX;
         
         group.position.set(x, this.settings.tree.groundY, z);
         

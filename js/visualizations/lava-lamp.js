@@ -94,7 +94,6 @@ export class LavaLamp {
     
     pause() {
         this.isPaused = true;
-        console.log('🌊 Lava lamp paused');
     }
     
     renderSingleFrame(forceResize = false) {
@@ -116,7 +115,6 @@ export class LavaLamp {
             // If size changed, trigger resize BEFORE rendering
             if (currentWidth !== this.lastWidth || currentHeight !== this.lastHeight) {
                 this.onResize();
-                console.log('🌊 Lava lamp resized before frame render');
             }
         }
         
@@ -129,7 +127,6 @@ export class LavaLamp {
             requestAnimationFrame(() => {
                 if (this.composer) {
                     this.composer.render();
-                    console.log('🌊 Lava lamp rendered single frame (double render for stability)');
                 }
             });
         }
@@ -164,7 +161,6 @@ export class LavaLamp {
             }
             
             this.animate(); // Restart animation loop
-            console.log('🌊 Lava lamp resumed');
         }
     }
     

@@ -2,33 +2,17 @@
 // Using new component architecture
 
 import { Sidebar } from '../components/index.js';
+import { visualizationRegistry } from '../utils/visualization-registry.js';
 
-export const navigationData = [
-    {
-        id: 'visualizations',
-        title: 'Visualizations',
-        icon: 'bx-paint',
-        children: [
-            { 
-                id: 'viz-lava', 
-                title: 'Lava Lamp', 
-                module: 'pages/visualization-lava-lamp',
-                description: 'Organic flowing metaball animation'
-            },
-            { 
-                id: 'viz-network', 
-                title: 'Blob Network', 
-                module: 'pages/visualization-blob-network',
-                description: '2D IK system with visible connections'
-            },
-            { 
-                id: 'viz-forest', 
-                title: 'Forest', 
-                module: 'pages/visualization-forest',
-                description: 'Infinite forest of Munari-style trees with wind'
-            }
-        ]
-    },
+// Get navigation data with dynamic visualizations
+function getNavigationData() {
+    return [
+        {
+            id: 'visualizations',
+            title: 'Visualizations',
+            icon: 'bx-paint',
+            children: visualizationRegistry.getNavigationData()
+        },
     {
         id: 'page-examples',
         title: 'Page Examples',
@@ -85,7 +69,11 @@ export const navigationData = [
             }
         ]
     }
-];
+    ];
+}
+
+// Export navigation data as a getter so it's always fresh
+export const navigationData = getNavigationData();
 
 /**
  * Navigation class (backwards compatible wrapper)
@@ -103,9 +91,9 @@ export class Navigation {
         // Clear container
         this.container.innerHTML = '';
         
-        // Create sidebar component
+        // Create sidebar component with fresh navigation data
         this.sidebarComponent = new Sidebar({
-            navigationData,
+            navigationData: getNavigationData(),
             onNavigate: (itemId, modulePath) => {
                 if (this.onNavigate) {
                     this.onNavigate(itemId, modulePath);
