@@ -1,0 +1,72 @@
+{
+  "type": "case-study",
+  "id": "lexus-april-fools",
+  "title": "Lexus April Fools",
+  "client": "Lexus",
+  "role": "Creative Director",
+  "year": "2015-2020",
+  "tags": ["social", "campaign", "cultural marketing"],
+  "overview": {
+    "challenge": "Lexus had long been known as the dependable choice. Refined, reliable, but also predictable. To win younger buyers, we needed to prove Lexus could be unexpected.",
+    "solution": "Created annual April Fools cultural moments with campaigns like Lane Valet, Genetic Select, and Driving Disrupted that reframed Lexus as unexpected, playful, and culturally relevant.",
+    "impact": "Since 2015, Lexus cultural moments have delivered real impact including millions of views, major press, and stronger youth sentiment proving Lexus could win over a new generation of buyers."
+  },
+  "metrics": [
+    {
+      "label": "Engagement",
+      "value": "~3× higher than Lexus average"
+    },
+    {
+      "label": "Views",
+      "value": "Millions"
+    },
+    {
+      "label": "Impact",
+      "value": "Annual tradition"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "Lexus April Fools",
+      "description": "A long running series that made Lexus feel unexpected, clever, and part of the cultural conversation.",
+      "titleImage": "/images/case-studies/lexus-april-fools/fool.png"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/lexus-april-fools/0018-2160-1215.jpg",
+      "alt": "Genetic Select campaign",
+      "caption": "Genetic Select - Playful take on luxury preferences"
+    },
+    {
+      "type": "tv",
+      "src": "https://oneover.com/videos/geneticselect.mp4",
+      "alt": "Genetic Select campaign",
+      "caption": "Genetic Select - Playful take on luxury preferences"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/lexus-april-fools/0017-2160-1215.jpg",
+      "alt": "Genetic Select details",
+      "caption": "Genetic Select - Campaign imagery"
+    },
+    {
+      "type": "tv",
+      "src": "https://oneover.com/videos/vlcro.mp4",
+      "alt": "Lane Valet campaign video",
+      "caption": "Lane Valet - First Lexus April Fools stunt"
+    },
+    {
+      "type": "tv",
+      "src": "https://oneover.com/videos/lanevalet.mp4",
+      "alt": "Lane Valet extended",
+      "caption": "Millions of views and major press coverage"
+    },
+    {
+      "type": "tv",
+      "src": "https://oneover.com/videos/drivingdisrupted.mp4",
+      "alt": "Driving Disrupted campaign",
+      "caption": "Driving Disrupted - Continuing the annual tradition"
+    }
+  ]
+}

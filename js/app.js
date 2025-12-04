@@ -3,6 +3,10 @@
 import { Navigation } from './core/navigation.js';
 import { ContentManager } from './core/content-manager.js';
 import { navigationData } from './core/navigation.js';
+import { Tutorial } from './components/index.js';
+import { uiLayerManager } from './utils/fullscreen-manager.js';
+import { MusicPlayer } from './components/organisms/MusicPlayer.js';
+import { lazyImageLoader } from './utils/lazy-image-loader.js';
 
 class App {
     constructor() {
@@ -18,10 +22,13 @@ class App {
     // Helper to find module path by experience ID
     findModuleById(data, id) {
         for (let group of data) {
+            if (group.id === id && (group.module || group.dataPath)) {
+                return group.module || group.dataPath;
+            }
             if (group.children) {
                 const item = group.children.find(child => child.id === id);
                 if (item) {
-                    return item.module;
+                    return item.module || item.dataPath;
                 }
             }
         }
@@ -35,6 +42,9 @@ class App {
                 document.addEventListener('DOMContentLoaded', resolve);
             });
         }
+
+        // Initialize tint layer immediately
+        this.createTintLayer();
 
         // Initialize navigation
         const navContainer = document.querySelector('.nav-content');
@@ -71,13 +81,19 @@ class App {
         this.contentManager = new ContentManager(headerElement, bodyElement, heroContainer);
 
         // Connect navigation to content manager
-        this.navigation.onNavigate = (itemId, modulePath) => {
-            this.loadExperience(itemId, modulePath);
+        this.navigation.onNavigate = (itemId, modulePathOrType) => {
+            this.loadContent(itemId, modulePathOrType);
         };
 
         // Setup theme toggle
         this.setupThemeToggle();
 
+        // Setup music player
+        this.setupMusicPlayer();
+        
+        // Setup global media handling (videos vs music)
+        this.setupGlobalMediaHandling();
+        
         // Setup mobile menu
         this.setupMobileMenu();
 
@@ -106,8 +122,13 @@ class App {
         // Hide loader
         this.hideLoader();
 
+        // Check if first visit - show tutorial instead of home state
+        // if (!Tutorial.hasSeenTutorial()) {
+        //     await this.showTutorial();
+        // } else {
         // First load animation (now that content is loaded)
         await this.animateFirstLoad();
+        // }
 
         // Setup resize handler to manage nav state across breakpoints
         this.setupResizeHandler();
@@ -115,6 +136,7 @@ class App {
         // Setup scroll and swipe navigation
         this.setupScrollNavigation();
         this.setupSwipeNavigation();
+        this.setupKeyboardNavigation();
 
         // Mark first load as complete
         this.isFirstLoad = false;
@@ -122,7 +144,10 @@ class App {
         this.isReady = true;
     }
 
-    async loadExperience(itemId, modulePath) {
+    async loadContent(itemId, modulePathOrType) {
+        // Close mobile menu immediately to show transition
+        this.closeMobileMenu();
+
         // Find the target index
         const targetIndex = this.modules.findIndex(m => m.id === itemId);
         if (targetIndex === -1) return;
@@ -150,12 +175,12 @@ class App {
 
         // Navigate with transition based on direction
         await this.navigateToModuleByIndex(targetIndex);
-
-        // Close mobile menu
-        this.closeMobileMenu();
     }
 
     async loadFromUrl(itemId, modulePath) {
+        // Close mobile menu immediately
+        this.closeMobileMenu();
+
         // Find the target index
         const targetIndex = this.modules.findIndex(m => m.id === itemId);
         if (targetIndex === -1) return;
@@ -178,9 +203,38 @@ class App {
 
         // Navigate with transition based on direction
         await this.navigateToModuleByIndex(targetIndex);
+    }
 
-        // Close mobile menu
-        this.closeMobileMenu();
+    async loadRandomVisualization() {
+        const visualizations = this.modules.filter(m => !m.type || m.type === 'visualization');
+        if (visualizations.length > 0) {
+            let randomViz;
+            // If we have a current module and multiple options, try to pick a different one
+            if (this.modules[this.currentModuleIndex] && visualizations.length > 1) {
+                let attempts = 0;
+                do {
+                    randomViz = visualizations[Math.floor(Math.random() * visualizations.length)];
+                    attempts++;
+                } while (randomViz.id === this.modules[this.currentModuleIndex].id && attempts < 5);
+            } else {
+                randomViz = visualizations[Math.floor(Math.random() * visualizations.length)];
+            }
+
+            this.currentModuleIndex = this.modules.findIndex(m => m.id === randomViz.id);
+            
+            // Highlight in navigation
+            if (this.navigation) {
+                this.navigation.setActive(randomViz.id);
+                
+                // Ensure the active item is visible/expanded
+                // Navigation component handles this internal logic, but we make sure we call it
+            }
+
+            await this.contentManager.loadContent(randomViz.id, randomViz.module);
+            
+            // Refresh lazy image loader for initial content
+            lazyImageLoader.refresh();
+        }
     }
 
     async handleUrlNavigation() {
@@ -196,19 +250,89 @@ class App {
                 if (!this.isFirstLoad) {
                     this.navigation.setActive(experienceId);
                 }
-                // Load the experience
-                await this.contentManager.loadExperience(experienceId, modulePath);
+                // Load the content (handles all types)
+                await this.contentManager.loadContent(experienceId, modulePath);
+                
+                // Refresh lazy image loader for initial content
+                lazyImageLoader.refresh();
+                
+                // Muffle music if initially loading a case study
+                if (this.musicPlayer) {
+                    const targetModule = this.modules.find(m => m.id === experienceId);
+                    if (targetModule) {
+                        const isVisualization = (!targetModule.type || targetModule.type === 'visualization');
+                        // Use a short delay or immediate? Immediate is fine as player is created.
+                        // However, audio context might be suspended. setMuffled handles check.
+                        this.musicPlayer.setMuffled(!isVisualization);
+                    }
+                }
                 return;
             }
         }
 
         // No URL parameter - load random visualization on first load (without setting URL)
         if (this.isFirstLoad && this.modules.length > 0) {
-            const randomModule = this.modules[this.currentModuleIndex];
-            
-            this.navigation.setActive(randomModule.id);
-            await this.contentManager.loadExperience(randomModule.id, randomModule.module);
+            await this.loadRandomVisualization();
         }
+    }
+
+    setupMusicPlayer() {
+        this.musicPlayer = new MusicPlayer();
+        const playerElement = this.musicPlayer.render();
+        
+        // Append directly to UI layer for absolute positioning (bottom right)
+        const uiLayer = document.querySelector('.ui-layer');
+        if (uiLayer) {
+            uiLayer.appendChild(playerElement);
+        }
+    }
+
+    setupGlobalMediaHandling() {
+        // Use capture phase to detect play/pause events from any video element
+        
+        // When a video starts playing
+        document.addEventListener('play', (e) => {
+            if (e.target.tagName !== 'VIDEO') return;
+            
+            // 1. Stop all other videos
+            const allVideos = document.querySelectorAll('video');
+            allVideos.forEach(video => {
+                if (video !== e.target && !video.paused) {
+                    video.pause();
+                }
+            });
+            
+            // 2. Duck music if playing
+            if (this.musicPlayer) {
+                this.musicPlayer.duck();
+            }
+        }, true); // Capture phase
+        
+        // When a video stops (pause or ended)
+        const checkResumeMusic = (e) => {
+            if (e.target.tagName !== 'VIDEO') return;
+            
+            // Wait a tick to see if another video started immediately
+            setTimeout(() => {
+                // Check if ANY video is currently playing
+                const allVideos = document.querySelectorAll('video');
+                let isAnyPlaying = false;
+                
+                allVideos.forEach(video => {
+                    if (!video.paused && !video.ended && video.readyState > 2) {
+                        isAnyPlaying = true;
+                    }
+                });
+                
+                // If no videos are playing, resume music
+                if (!isAnyPlaying && this.musicPlayer) {
+                    this.musicPlayer.unduck();
+                }
+            }, 50);
+        };
+        
+        document.addEventListener('pause', checkResumeMusic, true);
+        document.addEventListener('ended', checkResumeMusic, true);
     }
 
     setupThemeToggle() {
@@ -216,7 +340,7 @@ class App {
         const icon = toggle.querySelector('i');
 
         // Check for saved theme preference
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         icon.className = savedTheme === 'dark' ? 'bx bx-moon' : 'bx bx-sun';
 
@@ -232,6 +356,9 @@ class App {
             window.dispatchEvent(new CustomEvent('themechange', {
                 detail: { theme: newTheme }
             }));
+
+            // Blur the toggle button to prevent keyboard focus trap
+            toggle.blur();
         });
     }
 
@@ -252,6 +379,9 @@ class App {
             sidebar.classList.toggle('mobile-open');
             overlay.classList.toggle('active');
             toggle.classList.toggle('active');
+
+            // Blur the toggle button to prevent keyboard focus trap
+            toggle.blur();
         });
 
         overlay.addEventListener('click', () => {
@@ -273,63 +403,391 @@ class App {
         const logo = document.querySelector('.logo');
         if (logo) {
             logo.addEventListener('click', async () => {
+                // Close mobile nav immediately if open
+                this.closeMobileMenu();
+
+                // Unmuffle music (returning to home/hub)
+                if (this.musicPlayer) {
+                    this.musicPlayer.setMuffled(false);
+                }
+
                 // Clear URL
                 window.history.pushState({}, '', window.location.pathname);
                 
-                // Show home state overlay
-                await this.showHomeStateOverlay();
+                // 1. Transition out current content (Standard Page Transition - slide DOWN)
+                // 'up' direction means move current content DOWN (y: 100%) to reveal from top
+                await this.slideOutContent('up'); 
                 
-                // Close mobile nav if open
-                this.closeMobileMenu();
+                // 2. Show home state overlay sliding in from TOP
+                await this.showHomeStateOverlay(async () => {
+                    // Load new random visualization while overlay covers
+                    await this.loadRandomVisualization();
+                }, true); // true = use slide-in animation
             });
         }
     }
+
+    async showTutorial() {
+        const appContainer = document.querySelector('.app-container');
+        
+        // Make app visible for tutorial
+        gsap.set(appContainer, { opacity: 1 });
+
+        // Create and show tutorial
+        const tutorial = new Tutorial({
+            onComplete: async () => {
+                // After tutorial, show first load animation
+                await this.animateFirstLoad();
+            }
+        });
+
+        const tutorialElement = tutorial.render();
+        document.body.appendChild(tutorialElement);
+        tutorial.element = tutorialElement;
+
+        // Fade in tutorial
+        gsap.fromTo(tutorialElement, 
+            { opacity: 0 },
+            { opacity: 1, duration: 0.6, ease: 'power2.out' }
+        );
+    }
     
-    async showHomeStateOverlay() {
+    // Beautiful typography animation for home title
+    async animateHomeTitle(duration = 3000) {
+        const header = document.querySelector('.content-header');
+        if (!header) return;
+        
+        const title = header.querySelector('.page-title');
+        const desc = header.querySelector('.page-description');
+        
+        // Save original description text if not saved
+        if (!desc.dataset.originalText) {
+            desc.dataset.originalText = desc.innerHTML;
+        }
+        
+        // Ensure visible
+        gsap.set(header, { 
+            display: 'block', 
+            opacity: 1, 
+            pointerEvents: 'none',
+            top: '50%',
+            y: '-50%',
+            position: 'absolute',
+            zIndex: 10
+        });
+        
+        // Split text if needed
+        this.splitTextToChars(title);
+        
+        const chars = title.querySelectorAll('.char');
+        
+        // Reset state
+        gsap.set(chars, { 
+            y: 100, 
+            opacity: 0, 
+            rotateX: -90,
+            scale: 0.5
+        });
+        
+        // Reset desc for scramble
+        desc.style.opacity = 1;
+        desc.innerText = ''; // Start empty/ready for scramble
+        
+        const tl = gsap.timeline();
+        
+        // Trigger scramble in
+        this.scrambleText(desc, desc.dataset.originalText, 1500, 'in');
+        
+        // Animate In - Beautiful Build
+        tl.to(chars, {
+            y: 0,
+            opacity: 1,
+            rotateX: 0,
+            scale: 1,
+            duration: 1.2,
+            stagger: 0.04,
+            ease: 'expo.out' // Dramatic easing
+        });
+        
+        // Wait
+        tl.to({}, { duration: duration / 1000 });
+        
+        // Trigger scramble out
+        tl.add(() => {
+            this.scrambleText(desc, '', 800, 'out');
+        }, '-=0.2');
+        
+        // Animate Out - Elegant Fade
+        tl.to(chars, {
+            y: -60,
+            opacity: 0,
+            rotateX: 60,
+            duration: 0.8,
+            stagger: 0.02,
+            ease: 'power2.in'
+        });
+        
+        await tl;
+    }
+
+    // Helper for text scramble effect
+    scrambleText(element, finalText, duration = 1000, mode = 'in') {
+        // Character sets by visual weight (lightest to heaviest)
+        const charsLight = '.,:;\'"`-';
+        const charsMedium = '+<>/!?(){}[]';
+        // Special chars only as requested for heavy
+        const charsHeavy = '#@$%&'; 
+        
+        const fps = 60;
+        const totalFrames = Math.max((duration / 1000) * fps, 1);
+        let frame = 0;
+        
+        // Helper to split by BR tags
+        const splitByBr = (html) => html.split(/<br\s*\/?>/i);
+        
+        const targetLines = mode === 'in' ? splitByBr(finalText) : [''];
+        const originalLines = mode === 'in' ? [''] : splitByBr(element.dataset.originalText || element.innerHTML);
+        
+        // Use the source content (target for IN, original for OUT) to determine structure/length
+        const sourceLines = mode === 'in' ? targetLines : originalLines;
+        // Total characters across all lines (excluding BRs)
+        const totalChars = sourceLines.reduce((acc, line) => acc + line.length, 0);
+        
+        if (element.scrambleInterval) clearInterval(element.scrambleInterval);
+        element.style.opacity = 1;
+        
+        element.scrambleInterval = setInterval(() => {
+            frame++;
+            const progress = frame / totalFrames;
+            
+            if (progress >= 1) {
+                element.innerHTML = finalText;
+                clearInterval(element.scrambleInterval);
+                if (mode === 'out') element.style.opacity = 0;
+                return;
+            }
+            
+            let finalOutputLines = [];
+            let globalCharIndex = 0;
+            
+            // Iterate over the lines of the source text
+            for (let lineIdx = 0; lineIdx < sourceLines.length; lineIdx++) {
+                const lineContent = sourceLines[lineIdx];
+                let lineOutput = '';
+                
+                for (let i = 0; i < lineContent.length; i++) {
+                    const currentGlobalIndex = globalCharIndex + i;
+                    
+                    // Wave stagger logic
+                    let charProgress;
+                    if (mode === 'in') {
+                        const charDuration = 0.4; 
+                        const startDelay = (currentGlobalIndex / Math.max(totalChars, 1)) * (1 - charDuration);
+                        charProgress = (progress - startDelay) / charDuration;
+                    } else {
+                        // OUT: Reverse
+                        const charDuration = 0.4;
+                        const startDelay = (currentGlobalIndex / Math.max(totalChars, 1)) * (1 - charDuration);
+                        charProgress = 1 - ((progress - startDelay) / charDuration);
+                    }
+                    
+                    // Clamp
+                    if (charProgress < 0) charProgress = 0;
+                    if (charProgress > 1) charProgress = 1;
+                    
+                    // Determine char
+                    if (charProgress === 1) {
+                        // Show correct char
+                        lineOutput += lineContent[i];
+                    } else if (charProgress > 0.8) {
+                        lineOutput += charsHeavy[Math.floor(Math.random() * charsHeavy.length)];
+                    } else if (charProgress > 0.5) {
+                        lineOutput += charsMedium[Math.floor(Math.random() * charsMedium.length)];
+                    } else if (charProgress > 0.2) {
+                        lineOutput += charsLight[Math.floor(Math.random() * charsLight.length)];
+                    } else {
+                        // Invisible / Space
+                        lineOutput += '&nbsp;';
+                    }
+                }
+                
+                finalOutputLines.push(lineOutput);
+                globalCharIndex += lineContent.length;
+            }
+            
+            // Join lines with BR
+            element.innerHTML = finalOutputLines.join('<br>');
+            
+        }, 1000 / fps);
+    }
+
+    splitTextToChars(element) {
+        if (!element || element.classList.contains('splitted')) return;
+        element.classList.add('splitted');
+
+        const nodes = Array.from(element.childNodes);
+        element.innerHTML = '';
+        
+        nodes.forEach(node => {
+            if (node.nodeType === 3) { // Text node
+                const text = node.nodeValue;
+                // Preserve spaces as non-breaking or normal spaces
+                // We split by character
+                const chars = text.split('');
+                chars.forEach(char => {
+                    if (char.trim() === '') {
+                        element.appendChild(document.createTextNode(char));
+                    } else {
+                        const span = document.createElement('span');
+                        span.textContent = char;
+                        span.className = 'char';
+                        span.style.display = 'inline-block';
+                        span.style.transformStyle = 'preserve-3d';
+                        span.style.backfaceVisibility = 'hidden';
+                        // Add minimal margin to prevent letters colliding if font has kerning
+                        span.style.minWidth = '0.2em'; 
+                        // Actually minWidth might break layout for narrow letters like 'I'.
+                        // Let's remove minWidth, usually inline-block respects font metrics.
+                        span.style.minWidth = ''; 
+                        element.appendChild(span);
+                    }
+                });
+            } else {
+                element.appendChild(node.cloneNode(true));
+            }
+        });
+    }
+
+    async showTitleTemporarily(duration = 3000) {
+        const headerElement = document.querySelector('.content-header');
+        if (!headerElement) return;
+
+        const isDesktop = window.innerWidth > 768;
+
+        // Ensure visible properties
+        gsap.set(headerElement, {
+            display: 'block',
+            position: 'absolute',
+            zIndex: 10,
+            top: '50%',
+            y: '-50%',
+            pointerEvents: 'none',
+            opacity: 0
+        });
+
+        // Animate In
+        await gsap.to(headerElement, {
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power2.out',
+            overwrite: true
+        });
+
+        // Wait
+        await new Promise(resolve => setTimeout(resolve, duration));
+
+        // Animate Out
+        await gsap.to(headerElement, {
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power2.inOut',
+            overwrite: true
+        });
+    }
+
+    async showHomeStateOverlay(onVisibleCallback = null, slideIn = false) {
         const mainContent = document.querySelector('.main-content');
+        const heroContainer = document.querySelector('.hero-container');
         const isDesktop = window.innerWidth > 768;
         
         // Create home state overlay
         const homeOverlay = this.createHomeOverlay();
         document.body.appendChild(homeOverlay);
         
-        // Set initial state (hidden)
-        gsap.set(homeOverlay, { opacity: 0 });
-        
-        if (isDesktop) {
-            // Desktop: Fade in overlay, pause, fade out
-            await gsap.to(homeOverlay, {
-                opacity: 1,
-                duration: 0.8,
-                ease: 'power2.out'
+        // Set initial state
+        if (slideIn) {
+            // Slide in from TOP (since we slid current content DOWN)
+            gsap.set(homeOverlay, { 
+                y: '-100%', 
+                opacity: 1 
             });
-            
-            await new Promise(resolve => setTimeout(resolve, 1200));
-            
+        } else {
+            gsap.set(homeOverlay, { opacity: 0 });
+        }
+        
+        // Entrance Animation
+        if (slideIn) {
             await gsap.to(homeOverlay, {
-                opacity: 0,
-                duration: 0.6,
+                y: '0%',
+                duration: 0.5,
                 ease: 'power2.inOut'
             });
         } else {
-            // Mobile: Fade in overlay, pause, fade out
             await gsap.to(homeOverlay, {
                 opacity: 1,
                 duration: 0.8,
                 ease: 'power2.out'
             });
-            
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            await gsap.to(homeOverlay, {
-                opacity: 0,
-                duration: 0.6,
-                ease: 'power2.inOut'
-            });
         }
         
+        // Callback while overlay is visible (load content)
+        if (onVisibleCallback) {
+            
+            // Ensure main content is reset and ready behind overlay
+            // We set opacity to 0 first, then animate to 1 to ensure a smooth "ready" state
+            // This prevents any frame glitches where content might be partially rendered
+            gsap.set([mainContent, heroContainer], { 
+                y: 0,
+                opacity: 0,
+                clearProps: 'transform' 
+            });
+
+            // Show header if it was hidden (for home state)
+            const headerElement = document.querySelector('.content-header');
+            if (headerElement) {
+                // Ensure header is visible and positioned correctly for the transition
+                // This makes it "sit above" the visualization
+                gsap.set(headerElement, { 
+                    display: 'block', 
+                    opacity: 0,
+                    y: 20,
+                    position: 'absolute', // Enforce positioning
+                    zIndex: 10,           // Enforce layering
+                    pointerEvents: 'none' // Enforce click-through
+                });
+            }
+
+            await onVisibleCallback();
+
+            // Wait a frame to ensure DOM updates are processed
+            await new Promise(resolve => requestAnimationFrame(resolve));
+
+            // Fade content in (behind the overlay)
+            gsap.to([mainContent, heroContainer], {
+                opacity: 1,
+                duration: 0.1, // Quick fade in behind overlay
+                overwrite: true
+            });
+
+            // Animate header in
+            if (headerElement) {
+                // Show temporarily via helper
+                this.animateHomeTitle(3000);
+            }
+        }
+        
+        // Hold to ensure visualization is fully initialized
+        await new Promise(resolve => setTimeout(resolve, isDesktop ? 1200 : 2000));
+        
+        // Exit Animation (Fade out overlay to reveal content)
+        // await gsap.to(homeOverlay, {
+        //     opacity: 0,
+        //     duration: 1.2, // Slower fade out for smoother reveal
+        //     ease: 'power2.inOut'
+        // });
+        
         // Remove overlay
-        homeOverlay.remove();
+        // homeOverlay.remove();
     }
 
     async animateFirstLoad() {
@@ -340,7 +798,9 @@ class App {
         const isDesktop = window.innerWidth > 768;
         const hasVisualization = !!document.querySelector('.visualization-container');
 
-        console.log('animateFirstLoad - hasVisualization:', hasVisualization);
+        // Check if we have a deep link
+        const params = new URLSearchParams(window.location.search);
+        const hasDeepLink = !!params.get('experience');
 
         // Fade in app container
         gsap.to(appContainer, {
@@ -349,12 +809,22 @@ class App {
             ease: 'power2.out'
         });
 
-        // Only show home overlay if we have a visualization loaded
-        if (!hasVisualization) {
-            console.warn('No visualization loaded for home state');
+        // Only show home overlay if we have a visualization loaded AND NO deep link
+        if (!hasVisualization || hasDeepLink) {
             // Just show nav
             if (isDesktop) {
+                // Ensure proper handoff to Sidebar component
                 gsap.set(sidebar, { x: 0, opacity: 1 });
+                
+                // Clear inline styles so CSS classes can control visibility
+                gsap.set(sidebar, { clearProps: 'opacity' });
+                
+                if (this.navigation && this.navigation.sidebarComponent) {
+                    this.navigation.sidebarComponent.showUI(3000);
+                } else {
+                    document.body.classList.add('nav-visible');
+                    sidebar.classList.add('visible');
+                }
             } else {
                 gsap.set(sidebar, { x: '-100%', opacity: 1 });
             }
@@ -365,6 +835,20 @@ class App {
         // Create home state overlay
         const homeOverlay = this.createHomeOverlay();
         document.body.appendChild(homeOverlay);
+
+        // Prepare header for animation
+        const headerElement = document.querySelector('.content-header');
+        if (headerElement) {
+            gsap.set(headerElement, { 
+                display: 'block', 
+                opacity: 0,
+                top: '50%',
+                y: '-50%', // Center vertically
+                position: 'absolute',
+                zIndex: 10,
+                pointerEvents: 'none'
+            });
+        }
 
         if (isDesktop) {
             // DESKTOP: Show visualization, animate in nav and home overlay
@@ -383,12 +867,18 @@ class App {
                 opacity: 0
             });
 
-            // Fade in home overlay
-            await gsap.to(homeOverlay, {
+            // Fade in home overlay (if it has styles)
+            gsap.to(homeOverlay, {
                 opacity: 1,
                 duration: 0.8,
                 ease: 'power2.out'
             });
+
+            // Animate header in
+            if (headerElement) {
+                // Show temporarily via helper
+                this.animateHomeTitle(3000);
+            }
 
             // Wait a moment
             await new Promise(resolve => setTimeout(resolve, 1200));
@@ -401,6 +891,19 @@ class App {
                 ease: 'expo.inOut'
             });
 
+            // Hand off visibility control to Sidebar component and CSS
+            // 1. Activate the "visible" state in Sidebar component (adds classes)
+            if (this.navigation && this.navigation.sidebarComponent) {
+                this.navigation.sidebarComponent.showUI(3000);
+            } else {
+                // Fallback if component access fails
+                document.body.classList.add('nav-visible');
+                sidebar.classList.add('visible');
+            }
+
+            // 2. Clear GSAP inline styles so CSS classes can control visibility
+            gsap.set(sidebar, { clearProps: 'opacity' });
+            
             // Wait another moment
             await new Promise(resolve => setTimeout(resolve, 800));
 
@@ -421,11 +924,17 @@ class App {
             gsap.set(homeOverlay, { opacity: 0 });
 
             // Fade in home overlay
-            await gsap.to(homeOverlay, {
+            gsap.to(homeOverlay, {
                 opacity: 1,
                 duration: 0.8,
                 ease: 'power2.out'
             });
+
+            // Animate header in
+            if (headerElement) {
+                // Show temporarily via helper
+                this.animateHomeTitle(3000);
+            }
 
             // Wait a moment
             await new Promise(resolve => setTimeout(resolve, 2000));
@@ -458,37 +967,21 @@ class App {
             z-index: 1000;
             pointer-events: none;
         `;
-
-        const title = document.createElement('h1');
-        title.textContent = 'Motion Grammar';
-        title.style.cssText = `
-            font-size: 88px;
-            font-weight: 900;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
-            margin: 0 auto 20px;
-            text-transform: uppercase;
-            color: var(--color-text-primary);
-            text-align: center;
-        `;
-
-        const subtitle = document.createElement('p');
-        subtitle.textContent = 'Dynamic design systems';
-        subtitle.style.cssText = `
-            font-size: 22px;
-            margin: 0 auto;
-            line-height: 1.5;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--color-text-primary);
-            text-align: center;
-        `;
-
-        overlay.appendChild(title);
-        overlay.appendChild(subtitle);
+        
+        // We do NOT create any content here. The overlay itself is just a background/scrim.
+        // The title/content is managed via the .content-header in the main DOM structure.
 
         return overlay;
+    }
+
+    createTintLayer() {
+        // Check if it exists
+        if (document.querySelector('.global-tint-layer')) return;
+
+        const tintLayer = document.createElement('div');
+        tintLayer.className = 'global-tint-layer';
+        // Insert as first child of body to be at the bottom
+        document.body.prepend(tintLayer);
     }
 
     setupResizeHandler() {
@@ -525,6 +1018,10 @@ class App {
                 
             } else if (!wasDesktop && isDesktop) {
                 // Crossed from mobile → desktop
+                
+                // Ensure mobile menu is closed when moving to desktop
+                this.closeMobileMenu();
+
                 // Show sidebar
                 gsap.set(sidebar, { 
                     x: 0,
@@ -553,22 +1050,39 @@ class App {
     }
 
     buildModuleList() {
-        // Only add visualizations - no separate homepage
+        // Add all content types to module list for scroll navigation
         navigationData.forEach(group => {
-            if (group.children) {
+            if (group.children && group.children.length > 0) {
+                // Groups with children (Visualizations, Interaction Studies, Case Studies)
                 group.children.forEach(item => {
+                    // Only add items with valid module/dataPath
+                    const modulePath = item.module || item.dataPath;
+                    if (modulePath) {
                     this.modules.push({
                         id: item.id,
                         title: item.title,
-                        module: item.module
-                    });
+                            module: modulePath,
+                            type: item.type
+                        });
+                    }
                 });
+            } else if (!group.children) {
+                // Top-level items (About, Contact)
+                const modulePath = group.dataPath || group.type;
+                if (modulePath) {
+                    this.modules.push({
+                        id: group.id,
+                        title: group.title,
+                        module: modulePath,
+                        type: group.type
+                    });
+                }
             }
+            // Skip groups with empty children arrays (like Interaction Studies placeholder)
         });
 
-        console.log('Built module list:', this.modules.length, 'modules');
 
-        // Set current index based on URL or pick random for first load
+        // Set current index based on URL or pick random visualization for first load
         const params = new URLSearchParams(window.location.search);
         const experienceId = params.get('experience');
         
@@ -576,12 +1090,14 @@ class App {
             const index = this.modules.findIndex(m => m.id === experienceId);
             if (index !== -1) {
                 this.currentModuleIndex = index;
-                console.log('Set current index from URL:', this.currentModuleIndex, experienceId);
             }
         } else if (this.isFirstLoad) {
-            // Pick a random visualization for first load
-            this.currentModuleIndex = Math.floor(Math.random() * this.modules.length);
-            console.log('Picked random visualization:', this.currentModuleIndex, this.modules[this.currentModuleIndex]);
+            // Pick a random VISUALIZATION (not case study or about) for first load
+            const visualizations = this.modules.filter(m => !m.type || m.type === 'visualization');
+            if (visualizations.length > 0) {
+                const randomViz = visualizations[Math.floor(Math.random() * visualizations.length)];
+                this.currentModuleIndex = this.modules.findIndex(m => m.id === randomViz.id);
+            }
         }
     }
 
@@ -589,10 +1105,20 @@ class App {
         let lastScrollTime = 0;
         const scrollCooldown = 1000; // 1 second cooldown between scrolls
 
-        console.log('Setting up scroll navigation');
-
         window.addEventListener('wheel', (e) => {
-            // Prevent default scroll behavior
+            // Allow native scrolling inside device mockups (phone, laptop, TV)
+            const mockupScrollable = e.target.closest('.iphone-content, .laptop-content, .tv-content');
+            if (mockupScrollable) {
+                return; // let the inner scroller handle this wheel event
+            }
+
+            // Prevent pagination when scrolling over the sidebar/navigation
+            const sidebarScrollable = e.target.closest('.sidebar, .nav-content');
+            if (sidebarScrollable) {
+                return; // let the sidebar handle its own scrolling
+            }
+
+            // Prevent default scroll behavior for global section navigation
             e.preventDefault();
 
             // Check if we're already transitioning or in cooldown
@@ -604,15 +1130,12 @@ class App {
             // Only trigger on significant scroll
             if (Math.abs(e.deltaY) > 10) {
                 lastScrollTime = now;
-                console.log('Scroll detected, deltaY:', e.deltaY);
                 
                 if (e.deltaY > 0) {
                     // Scroll down - next
-                    console.log('Navigating to next');
                     this.navigateToNext();
                 } else if (e.deltaY < 0) {
                     // Scroll up - previous
-                    console.log('Navigating to previous');
                     this.navigateToPrevious();
                 }
             }
@@ -631,6 +1154,11 @@ class App {
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
+            // Skip swipe navigation if any visualization is actively using touch/drag
+            if (window.isVisualizationDragging) {
+                return;
+            }
+            
             const now = Date.now();
             if (this.isTransitioning || (now - lastSwipeTime) < swipeCooldown) return;
 
@@ -649,6 +1177,23 @@ class App {
                 }
             }
         }, { passive: true });
+    }
+
+    setupKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+            // Ignore input elements
+            if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(document.activeElement.tagName)) return;
+
+            if (this.isTransitioning) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                this.navigateToNext();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                this.navigateToPrevious();
+            }
+        });
     }
 
     async navigateToNext() {
@@ -674,6 +1219,12 @@ class App {
         // Use forced direction if provided (for scroll/swipe), otherwise calculate from indices
         const direction = forcedDirection || (targetIndex > this.currentModuleIndex ? 'down' : 'up');
 
+        // Muffle music if navigating to a case study (anything not a visualization)
+        if (this.musicPlayer) {
+            const isVisualization = (!targetModule.type || targetModule.type === 'visualization');
+            this.musicPlayer.setMuffled(!isVisualization);
+        }
+
         // Step 1: Slide out current content
         await this.slideOutContent(direction);
 
@@ -693,7 +1244,16 @@ class App {
             }
         }, 0);
 
-        await this.contentManager.loadExperience(targetModule.id, targetModule.module);
+        await this.contentManager.loadContent(targetModule.id, targetModule.module);
+
+        // Refresh lazy image loader for newly loaded content
+        lazyImageLoader.refresh();
+
+        // SHOW NAVIGATION TEMPORARILY ON VERTICAL TRANSITION
+        // This ensures users know where they are when switching projects
+        if (this.navigation && this.navigation.sidebarComponent) {
+            this.navigation.sidebarComponent.showUI(3000);
+        }
 
         // Step 3: Slide in new content
         await this.slideInContent(direction);
@@ -849,4 +1409,10 @@ window.addEventListener('popstate', () => {
         app.handleUrlNavigation();
     }
 });
+
+// Global helper to reset and show tutorial again
+window.showTutorial = () => {
+    Tutorial.resetTutorial();
+    location.reload();
+};
 

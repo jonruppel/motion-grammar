@@ -1,0 +1,14 @@
+{
+  "type": "slide-deck",
+  "id": "about",
+  "title": "About",
+  "slides": [
+    {
+      "type": "intro",
+      "title": "Hello.",
+      "content": "I am a creative director and experience designer focused on motion, interaction, and the place where code meets culture. My work blends product craft, technical fluency, and clear narrative thinking to create systems and experiences that feel intuitive and expressive. I have founded Hooky, Spacecamp, and OneOver, and I led digital experience for Lexus for a decade. </br></br>Today I work across AI, interaction, and product </br>to help teams imagine and build what comes next.<br><br><span class=\"contact-links\"><a href=\"mailto:jon@motiongrammar.com\" target=\"_blank\">Email</a> &nbsp;&nbsp;|&nbsp;&nbsp; <a href=\"https://linkedin.com/in/jonruppel\" target=\"_blank\" rel=\"noopener noreferrer\">LinkedIn</a></span>",
+      "titleImage": "/images/case-studies/about/jon.png"
+    }
+  ]
+}
+

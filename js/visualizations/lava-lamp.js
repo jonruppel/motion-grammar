@@ -64,6 +64,10 @@ export class LavaLamp {
         this.lastHeight = 0;
         this.isPaused = false;
         
+        // Audio reactivity state
+        this.smoothedEnergy = 0;
+        this.cameraAngle = 0;
+        
         // Animation parameters (exposed for controls)
         this.animSpeed = this.settings.animation.speed;
         this.boundaries = { 
@@ -275,7 +279,8 @@ export class LavaLamp {
                     z: (Math.random() - 0.5) * 0.0008
                 },
                 phase: Math.random() * Math.PI * 2,
-                baseSize: size
+                baseSize: size,
+                baseColor: chosenColor.clone()
             };
             
             this.blobs.push(blob);
@@ -341,7 +346,54 @@ export class LavaLamp {
             this.animationId = requestAnimationFrame(() => this.animate());
         }
         
-        this.time += this.animSpeed;
+        // Check for audio data
+        let audioEnergy = 0;
+        let audioData = null;
+        
+        if (window.audioAnalyser) {
+            const bufferLength = window.audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            window.audioAnalyser.getByteFrequencyData(dataArray);
+            
+            // Calculate average energy
+            let sum = 0;
+            for (let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+            }
+            const average = sum / bufferLength;
+            
+            // Normalize (0-1) - Threshold for "playing"
+            // Apply volume scaling
+            const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+            
+            if (average > 10) {
+                audioEnergy = (average / 255) * volume;
+                audioData = dataArray;
+            }
+        }
+        
+        // Smooth the energy value to prevent chaos
+        // Lower factor = smoother/slower reaction, Higher = punchier
+        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        
+        // 1. Control Scene Rhythm (Global Time)
+        // Base speed + boost from smoothed energy
+        // "Fast song" (high energy) -> faster time -> faster blobs
+        // "Chill song" (low energy) -> slower time -> chill blobs
+        const currentSpeed = this.animSpeed * (1 + this.smoothedEnergy * 4);
+        this.time += currentSpeed;
+        
+        // 2. Control Camera Rotation
+        // Rotate camera around center based on energy
+        // Base rotation + boost from energy
+        const rotationSpeed = 0.0005 + (this.smoothedEnergy * 0.005);
+        this.cameraAngle += rotationSpeed;
+        
+        // Update camera position (orbit radius determined by initial Z settings roughly)
+        const orbitRadius = this.settings.camera.positionZ;
+        this.camera.position.x = Math.sin(this.cameraAngle) * orbitRadius;
+        this.camera.position.z = Math.cos(this.cameraAngle) * orbitRadius;
+        this.camera.lookAt(0, 0, 0);
         
         // Check if container size changed (e.g., during hero collapse animation)
         if (this.container) {
@@ -361,16 +413,55 @@ export class LavaLamp {
             const userData = blob.userData;
             const phaseOffset = userData.phase;
             
-            // Slow, organic floating motion - meditative lava lamp style
-            blob.position.x += Math.sin(this.time * 0.4 + phaseOffset) * 0.002 + userData.velocity.x;
-            blob.position.y += Math.cos(this.time * 0.25 + phaseOffset) * 0.002 + userData.velocity.y;
-            blob.position.z += Math.sin(this.time * 0.5 + phaseOffset) * 0.0008 + userData.velocity.z;
+            // Base motion parameters
+            let speedX = 0.002;
+            let speedY = 0.002;
+            let speedZ = 0.0008;
+            let pulseIntensity = 0.15;
+            let baseScale = userData.baseSize;
+            
+            // 3. Detailed Audio Reactivity
+            if (this.smoothedEnergy > 0.01) {
+                // Pulse based on specific frequency bin for this blob
+                // Map blob index to frequency bin
+                if (audioData) {
+                    const binIndex = Math.floor((index / this.blobs.length) * (audioData.length / 2));
+                    const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+                    const freqValue = (audioData[binIndex] / 255) * volume;
+                    
+                    // Increase pulse intensity with specific frequency (beat)
+                    // We combine smoothed energy (vibe) with immediate freq (beat)
+                    // Boosted sensitivity: 1.0 multiplier instead of 0.6
+                    pulseIntensity = 0.15 + (freqValue * 1.0) + (this.smoothedEnergy * 0.4);
+                    
+                    // Color Pulse (Blue -> Red) - Sharp transition
+                    const redColor = new THREE.Color(1, 0, 0);
+                    const threshold = 0.4;
+                    // Boost input by 1.5x for earlier color change
+                    const mix = Math.max(0, Math.min(1, (freqValue * 1.5 - threshold) * 3));
+                    
+                    blob.material.color.lerpColors(userData.baseColor, redColor, mix);
+                    blob.material.emissive.lerpColors(userData.baseColor, redColor, mix);
+
+                    // Add slight positional jitter on strong beats only (Lower threshold 0.4)
+                    if (freqValue > 0.4) {
+                        const jitter = freqValue * 0.05; // Slightly stronger jitter
+                        blob.position.x += (Math.random() - 0.5) * jitter;
+                        blob.position.y += (Math.random() - 0.5) * jitter;
+                    }
+                }
+            }
+            
+            // Slow, organic floating motion
+            blob.position.x += Math.sin(this.time * 0.4 + phaseOffset) * speedX + userData.velocity.x;
+            blob.position.y += Math.cos(this.time * 0.25 + phaseOffset) * speedY + userData.velocity.y;
+            blob.position.z += Math.sin(this.time * 0.5 + phaseOffset) * speedZ + userData.velocity.z;
             
             // Gentle pulsing/breathing
-            const scale = userData.baseSize * (1 + Math.sin(this.time * 0.6 + phaseOffset) * 0.15);
+            const scale = baseScale * (1 + Math.sin(this.time * 0.6 + phaseOffset) * pulseIntensity);
             blob.scale.set(scale, scale, scale);
             
-            // Boundary checks - use configurable boundaries
+            // Boundary checks
             if (Math.abs(blob.position.x) > this.boundaries.x) {
                 userData.velocity.x *= -1;
                 blob.position.x = Math.sign(blob.position.x) * this.boundaries.x;

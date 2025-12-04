@@ -1,0 +1,155 @@
+/* TV Mockup - CSS-based flat-screen frame */
+
+.tv-mockup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    max-width: 100%;
+    height: 100%;
+}
+
+/* TV Frame */
+.tv-frame {
+    position: relative;
+    width: 1000px;
+    background: linear-gradient(180deg, #262626 0%, #101010 100%);
+    border-radius: 8px; /* Tighter radius for a more TV-like profile */
+    box-shadow: 
+        0 30px 80px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.9);
+    padding: 20px; /* Uniform bezel thickness on all sides */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Single seamless shell */
+    transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Enlarge TV when navigation is hidden (UI auto-hide) */
+body:not(.nav-visible) .tv-frame {
+    width: 1400px;
+}
+
+/* TV Screen - single masked 16:9 surface */
+.tv-screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9; /* Ensure content area matches 16:9 video */
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 4px; /* Small radius for a modern flat panel look */
+    /* Inner rim and dimensionality just inside the bezel */
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.95),          /* hard glass edge against bezel */
+        inset 0 1px 2px rgba(255, 255, 255, 0.14), /* subtle top highlight */
+        inset 0 -2px 4px rgba(0, 0, 0, 0.9),       /* darker bottom edge */
+        inset 0 0 40px rgba(0, 0, 0, 0.8);         /* screen falloff */
+}
+
+/* TV Content */
+.tv-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+}
+
+/* Custom scrollbar for TV */
+.tv-content::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tv-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tv-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.tv-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Video inside TV */
+/* Media inside TV */
+.tv-content video,
+.tv-content img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+}
+
+/* Responsive: Smaller TV on smaller screens */
+@media (max-width: 1200px) {
+    .tv-frame {
+        width: 800px;
+        padding: 16px;
+    }
+    
+    body:not(.nav-visible) .tv-frame {
+        width: 1100px;
+    }
+}
+
+@media (max-width: 900px) {
+    .tv-frame {
+        width: 640px;
+        border-radius: 6px;
+        padding: 14px;
+    }
+    
+    body:not(.nav-visible) .tv-frame {
+        width: 85vw;
+    }
+}
+
+/* Responsive: Tablet/Mobile view */
+@media (max-width: 768px) {
+    .tv-frame {
+        width: 100%;
+        max-width: 500px;
+        border-radius: 4px;
+        padding: 12px;
+    }
+    
+    body:not(.nav-visible) .tv-frame {
+        width: 90vw;
+        max-width: 700px;
+    }
+}
+
+/* Light theme adjustments (TV shell remains black; only tweak UI details) */
+[data-theme="light"] .tv-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .tv-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* Loading state */
+.tv-frame.loading .tv-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+.tv-frame.loading .tv-content::after {
+    content: "Loading...";
+    color: var(--color-text-secondary);
+    font-size: 14px;
+}
+

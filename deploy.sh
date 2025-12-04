@@ -10,10 +10,12 @@ echo "🚀 Deploying Motion Grammar to Production..."
 # Clean up and create local zip directory
 rm -rf /Users/jonruppel/Sites/motion-grammar/zips && mkdir -p /Users/jonruppel/Sites/motion-grammar/zips
 
-# Copy files to zip directory
+# Copy files to zip directory (app source + static assets)
 cp -r js zips/js/
 cp -r styles zips/styles/
 cp -r images zips/images/
+cp -r data zips/data/
+cp -r music zips/music/
 cp index.html zips/index.html
 
 echo "✅ Files packaged for deployment"
@@ -75,12 +77,14 @@ scp /Users/jonruppel/Sites/motion-grammar/zips.zip jonruppel@208.109.241.221:/ho
 echo "🔧 Deploying on server..."
 ssh jonruppel@208.109.241.221 '
     # Create necessary directories if they dont exist
-    sudo mkdir -p /var/www/html/motiongrammar/{js,styles,images}
+    sudo mkdir -p /var/www/html/motiongrammar/{js,styles,images,data,music}
     
     # Clean existing directories
     sudo rm -rf /var/www/html/motiongrammar/js/*
     sudo rm -rf /var/www/html/motiongrammar/styles/*
     sudo rm -rf /var/www/html/motiongrammar/images/*
+    sudo rm -rf /var/www/html/motiongrammar/data/*
+    sudo rm -rf /var/www/html/motiongrammar/music/*
     sudo rm -f /var/www/html/motiongrammar/index.html
     sudo rm -f /var/www/html/motiongrammar/README.md
 
@@ -90,8 +94,10 @@ ssh jonruppel@208.109.241.221 '
     sudo mv zips/js/* js/
     sudo mv zips/styles/* styles/
     sudo mv zips/images/* images/
+    sudo mv zips/data/* data/ || true
+    sudo mv zips/music/* music/ || true
     sudo mv zips/index.html .
-    sudo mv zips/README.md .
+    sudo mv zips/README.md . 2>/dev/null || true
 
     # Set permissions
     sudo chown -R apache:apache /var/www/html/motiongrammar
@@ -140,7 +146,7 @@ ssh jonruppel@208.109.241.221 '
 </Directory>
 
 # Cache static assets for 1 year
-<FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico)$">
+<FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|mp3)$">
     Header set Cache-Control "public, max-age=31536000"
 </FilesMatch>
 

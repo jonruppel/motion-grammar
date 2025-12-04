@@ -1,0 +1,60 @@
+{
+  "type": "case-study",
+  "id": "koko-ai",
+  "title": "Koko AI",
+  "client": "Koko",
+  "role": "Product Designer & Creative Lead",
+  "year": "2024",
+  "tags": ["AI platform", "user experience", "peer support"],
+  "overview": {
+    "challenge": "Koko is an AI-powered peer platform bringing help into the social spaces where people already are. The platform needed to feel human, empathetic, and always accessible.",
+    "solution": "Designed a comprehensive user experience that prioritizes emotional intelligence and accessibility. Created intuitive interactions that balance AI capabilities with human connection, focusing on making help feel natural within social contexts.",
+    "impact": "Established Koko as a leader in AI-driven peer support, with a platform that users describe as feeling genuinely empathetic and supportive."
+  },
+  "metrics": [
+    {
+      "label": "Platform Focus",
+      "value": "AI-Powered Peer Support"
+    },
+    {
+      "label": "Design Focus",
+      "value": "Emotional Intelligence"
+    },
+    {
+      "label": "Key Feature",
+      "value": "Social Integration"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "Koko AI",
+      "description": "Millions of young people struggle with anxiety and depression without support. Koko brings help into the spaces they already use. It is a peer to peer platform enhanced by AI to make support feel empathetic, human, and close at hand.<br><br>Creative Direction with a thoughtful blend of technology and care.",
+      "titleImage": "/images/case-studies/koko/pals.png"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/koko/0022-2160-1215.jpg",
+      "alt": "Koko interface details",
+      "caption": "User interface and emotional design"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/koko/0023-2160-1215.jpg",
+      "alt": "Koko user experience",
+      "caption": "User interaction patterns"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/koko/0024-2160-1215.jpg",
+      "alt": "Koko visual language",
+      "caption": "Visual design system"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/koko/0025-2160-1215.jpg",
+      "alt": "Koko accessibility features",
+      "caption": "Accessibility and inclusivity"
+    }
+  ]
+}

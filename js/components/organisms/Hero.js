@@ -13,7 +13,7 @@ import { Component } from '../Component.js';
 export class Hero extends Component {
     render() {
         const {
-            title = 'Motion Grammar',
+            title = 'MOTION GRAMMAR',
             subtitle,
             animated = true,
             className = ''
@@ -37,15 +37,15 @@ export class Hero extends Component {
 
         // Title - convert newlines to <br> tags
         const titleElement = this.createElement('h1', {
-            className: 'home-title'
+            className: 'page-title'
         });
-        titleElement.innerHTML = title.replace(/\n/g, '<br>');
+        titleElement.innerHTML = title.replace(/\n/g, ' <br>');
         frame.appendChild(titleElement);
 
         // Subtitle
         if (subtitle) {
             const subtitleElement = this.createElement('p', {
-                className: 'home-subtitle',
+                className: 'page-description',
                 text: subtitle
             });
             frame.appendChild(subtitleElement);
@@ -123,7 +123,7 @@ export class Hero extends Component {
     animateTitle() {
         if (!this.element || !window.gsap) return;
         
-        const title = this.element.querySelector('.home-title');
+        const title = this.element.querySelector('.page-title');
         if (!title) return;
         
         const allLetters = this.splitTextIntoLetters(title);
@@ -155,7 +155,7 @@ export class Hero extends Component {
     animateSubtitle() {
         if (!this.element || !window.gsap) return;
         
-        const subtitle = this.element.querySelector('.home-subtitle');
+        const subtitle = this.element.querySelector('.page-description');
         if (!subtitle) return;
         
         gsap.fromTo(subtitle,

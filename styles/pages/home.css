@@ -58,8 +58,8 @@
     opacity: 1 !important;
 }
 
-.home-title,
-.home-subtitle {
+.page-title,
+.page-description {
     position: relative;
     z-index: 1;
     color: var(--color-text-primary) !important;
@@ -69,18 +69,24 @@
     -ms-user-select: none;
 }
 
-.home-title {
+/* Home-specific overrides for page-title */
+.home-state-overlay .page-title,
+.home-hero .page-title {
     font-size: 64px;
     font-weight: 900;
     line-height: 1.1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     margin: 0 auto 20px;
     perspective: 1000px;
     opacity: 1;
     text-transform: uppercase;
+    text-align: center;
+    text-shadow: 1px 0 0 currentColor; /* Faux bold to match navigation logo intensity */
 }
 
-.home-subtitle {
+/* Home-specific overrides for page-description */
+.home-state-overlay .page-description,
+.home-hero .page-description {
     font-size: 28px;
     opacity: 1;
     margin: 0 auto;
@@ -88,6 +94,7 @@
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    text-align: center;
 }
 
 /* Remove all experience cards and grid layouts */
@@ -103,45 +110,84 @@ body.home-active {
     overflow: hidden;
 }
 
-/* Responsive text sizing */
+/* Responsive text sizing for home context */
 @media (min-width: 769px) {
-    .home-title {
-        font-size: 88px;
+    .home-state-overlay .page-title,
+    .home-hero .page-title {
+        font-size: 120px;
     }
     
-    .home-subtitle {
-        font-size: 22px;
+    .home-state-overlay .page-description,
+    .home-hero .page-description {
+        font-size: 24px;
+    }
+    
+    /* Ensure BR is visible in home context if needed, or follow page-title rules */
+    .home-state-overlay .page-title br,
+    .home-hero .page-title br {
+        display: none; /* Hide break on desktop for single line, matching original behavior */
+    }
+    
+    /* Add space between words on desktop (since BR is hidden) */
+    .home-state-overlay .page-title,
+    .home-hero .page-title {
+        word-spacing: 0.2em;
     }
 }
 
 @media (min-width: 1024px) {
-    .home-title {
-        font-size: 104px;
+    .home-state-overlay .page-title,
+    .home-hero .page-title {
+        font-size: 160px;
     }
     
-    .home-subtitle {
-        font-size: 24px;
+    .home-state-overlay .page-description,
+    .home-hero .page-description {
+        font-size: 28px;
     }
 }
 
 @media (min-width: 1200px) {
-    .home-title {
-        font-size: 112px;
+    .home-state-overlay .page-title,
+    .home-hero .page-title {
+        font-size: 200px;
     }
     
-    .home-subtitle {
-        font-size: 26px;
+    .home-state-overlay .page-description,
+    .home-hero .page-description {
+        font-size: 32px;
     }
+}
+
+.home-state-overlay .page-title .mobile-break,
+.home-hero .page-title .mobile-break {
+    display: none;
 }
 
 /* Mobile - maintain fullscreen */
 @media (max-width: 768px) {
-    .home-title {
-        font-size: 40px;
+    .home-state-overlay .page-title,
+    .home-hero .page-title {
+        font-size: 64px;
+        line-height: 0.9;
+        /* Removed flex properties to rely on standard text-align: center */
+    }
+
+    .home-state-overlay .page-title .mobile-break,
+    .home-hero .page-title .mobile-break {
+        display: none;
     }
     
-    .home-subtitle {
-        font-size: 20px;
+    .home-state-overlay .page-description,
+    .home-hero .page-description {
+        font-size: 16px;
+        margin-top: 16px;
+    }
+    
+    /* Ensure BR is visible on mobile for stacking */
+    .home-state-overlay .page-title br,
+    .home-hero .page-title br {
+        display: block;
     }
 }
 

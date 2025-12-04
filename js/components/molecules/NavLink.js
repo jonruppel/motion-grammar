@@ -18,13 +18,17 @@ export class NavLink extends Component {
             id,
             title,
             module,
+            dataPath,
             description,
             active = false,
             onClick
         } = this.props;
 
-        if (!id || !title || !module) {
-            console.error('NavLink: id, title, and module props are required');
+        // Accept either module or dataPath
+        const modulePath = module || dataPath;
+
+        if (!id || !title || !modulePath) {
+            console.error('NavLink: id, title, and (module or dataPath) props are required', this.props);
             return this.createElement('div');
         }
 
@@ -36,7 +40,7 @@ export class NavLink extends Component {
             className: `nav-link${active ? ' active' : ''}`,
             dataset: {
                 itemId: id,
-                module: module
+                module: modulePath
             }
         });
 
@@ -74,8 +78,8 @@ export class NavLink extends Component {
             }, 300);
 
             if (onClick) {
-                onClick({ id, module });
-                this.emit('navLinkClick', { id, module, title });
+                onClick({ id, module: modulePath });
+                this.emit('navLinkClick', { id, module: modulePath, title });
             }
         });
 

@@ -1,0 +1,84 @@
+{
+  "type": "case-study",
+  "id": "oneover-com",
+  "title": "OneOver.com",
+  "client": "OneOver",
+  "role": "Co-Founder & Creative Director",
+  "year": "2021-Present",
+  "tags": ["SaaS platform", "creative services", "collaborative design"],
+  "overview": {
+    "challenge": "OneOver brings together the world's top design, strategy, and innovation talent on-demand. The platform needed to feel premium, trustworthy, and showcase world-class creative work while being easy to navigate.",
+    "solution": "Built a comprehensive portfolio and service platform that showcases creative excellence while maintaining an intuitive user experience. Designed systems that emphasize quality, trust, and accessibility to creative services.",
+    "impact": "Established OneOver as the go-to platform for on-demand creative talent, with a growing network of world-class creatives and satisfied clients."
+  },
+  "metrics": [
+    {
+      "label": "Platform Type",
+      "value": "On-Demand Creative Services"
+    },
+    {
+      "label": "Core Feature",
+      "value": "Global Talent Network"
+    },
+    {
+      "label": "Design Philosophy",
+      "value": "Premium Simplicity"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "OneOver.com",
+      "description": "AI is powerful, but it is fragmented. OneOver is a single unified workspace where creators can access the world's leading models in one place. Compare outputs, switch models instantly, and create without friction on any device. A multi model and multi modal platform built for clarity and exploration.",
+      "titleImage": "/images/case-studies/oneover/bento.png"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0028-2160-1215.jpg",
+      "alt": "OneOver design system",
+      "caption": "Design system and visual language"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0029-2160-1215.jpg",
+      "alt": "OneOver interactive components",
+      "caption": "Interactive UI components and patterns"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0030-2160-1215.jpg",
+      "alt": "OneOver talent discovery",
+      "caption": "Talent discovery and filtering"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0031-2160-1215.jpg",
+      "alt": "OneOver portfolio showcase",
+      "caption": "Portfolio showcase interface"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0032-2160-1215.jpg",
+      "alt": "OneOver collaboration features",
+      "caption": "Collaboration and workspace features"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0033-2160-1215.jpg",
+      "alt": "OneOver user experience flows",
+      "caption": "User experience flows and interactions"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0034-2160-1215.png",
+      "alt": "OneOver mobile responsive design",
+      "caption": "Mobile-responsive design"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/oneover/0035-2160-1215.png",
+      "alt": "OneOver accessibility features",
+      "caption": "Accessibility and inclusive design"
+    }
+  ]
+}

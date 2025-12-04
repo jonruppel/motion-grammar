@@ -1,0 +1,79 @@
+/* Contact Page Styles */
+
+.contact-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: var(--spacing-xl);
+}
+
+.contact-content {
+    max-width: 600px;
+    width: 100%;
+}
+
+.contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.contact-link {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px 32px;
+    background: var(--color-surface-secondary);
+    border-radius: 16px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.contact-link i {
+    font-size: 32px;
+    color: var(--color-primary);
+}
+
+.contact-link:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    background: var(--color-surface-hover);
+}
+
+.contact-link:active {
+    transform: translateY(-2px) scale(1.01);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .contact-container {
+        padding: var(--spacing-lg);
+        min-height: 50vh;
+    }
+
+    .contact-link {
+        padding: 20px 24px;
+        font-size: 18px;
+    }
+
+    .contact-link i {
+        font-size: 28px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .contact-link {
+        transition: none;
+    }
+
+    .contact-link:hover {
+        transform: none;
+    }
+}
+

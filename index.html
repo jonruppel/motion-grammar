@@ -2,13 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion Visualizations - Jon Ruppel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Motion Grammar - Portfolio for Jon Ruppel</title>
+    <meta name="description" content="Portfolio for Jon Ruppel - Experience designer and creative director focused on motion, interaction, and innovative digital experiences.">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://motiongrammar.com/">
+    <meta property="og:title" content="Motion Grammar - Portfolio for Jon Ruppel">
+    <meta property="og:description" content="Portfolio for Jon Ruppel - Experience designer and creative director focused on motion, interaction, and innovative digital experiences.">
+    <meta property="og:image" content="https://motiongrammar.com/images/share.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://motiongrammar.com/">
+    <meta property="twitter:title" content="Motion Visualizations - Jon Ruppel">
+    <meta property="twitter:description" content="Creative Portfolio for Jon Ruppel - Experience designer and creative director focused on motion, interaction, and innovative digital experiences.">
+    <meta property="twitter:image" content="https://motiongrammar.com/images/share.png">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="styles/global.css">
     <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/components/iphone-mockup.css">
+    <link rel="stylesheet" href="styles/components/laptop-mockup.css">
+    <link rel="stylesheet" href="styles/components/tv-mockup.css">
+    <link rel="stylesheet" href="styles/components/music-player.css">
     <link rel="stylesheet" href="styles/navigation.css">
+    <link rel="stylesheet" href="styles/ui-layer.css">
     <link rel="stylesheet" href="styles/experiences.css">
+    <link rel="stylesheet" href="styles/pages/case-studies.css">
+    <link rel="stylesheet" href="styles/pages/contact.css">
 </head>
 <body>
     <!-- Loading Sequence -->
@@ -31,11 +56,11 @@
         <!-- Mobile Overlay -->
         <div class="mobile-overlay" id="mobileOverlay"></div>
 
-        <!-- Left Navigation -->
+        <!-- Left Navigation (Sidebar - will be moved to UI Layer on desktop) -->
         <nav class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo-container">
-                    <h1 class="logo">Motion<br>Visualizations</h1>
+                    <h1 class="logo">MOTION<br>GRAMMAR</h1>
                     <p class="logo-author">by Jon Ruppel</p>
                 </div>
             </div>
@@ -44,19 +69,27 @@
             </div>
         </nav>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
+        <!-- UI Layer Overlay (Appears on top of content) -->
+        <div class="ui-layer">
+            <div class="ui-layer-content">
+                <!-- Will be populated by app.js -->
+            </div>
+            <!-- Theme Controls (Far right upper corner) -->
             <div class="theme-controls">
                 <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle Theme">
                     <i class='bx bx-sun'></i>
                 </button>
             </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
             <div class="hero-container">
                 <!-- Hero will be dynamically mounted here when on homepage -->
             </div>
             <div class="content-header">
-                <h1 class="page-title">Motion<br>Grammar</h1>
-                <p class="page-description">Complete product experiences demonstrating holistic motion and interaction design</p>
+                <h1 class="page-title">MOTION <br>GRAMMAR</h1>
+                <p class="page-description">Creative Portfolio for Jon Ruppel</p>
             </div>
             <div class="content-body">
                 <!-- Content will be dynamically loaded here -->

@@ -1,0 +1,74 @@
+{
+  "type": "case-study",
+  "id": "lexus-com",
+  "title": "Lexus.com",
+  "client": "Lexus",
+  "role": "Experience Director",
+  "year": "2020",
+  "tags": ["automotive", "web design", "digital transformation"],
+  "overview": {
+    "challenge": "After winning younger buyers in culture, Lexus faced a new challenge. Repositioned Lexus as a digital leader.",
+    "solution": "Transforming Lexus.com wasn't just a redesign, it was a business shift. A modular platform, integrated dealership ecosystem, and bold creative positioned Lexus as a digital leader.",
+    "impact": "Repositioned Lexus as a digital leader with a modular platform that enabled rapid innovation."
+  },
+  "metrics": [
+    {
+      "label": "User Engagement",
+      "value": "Significantly Improved"
+    },
+    {
+      "label": "Platform",
+      "value": "Modular & Scalable"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "Lexus.com",
+      "description": "I led the design and development of the Lexus digital ecosystem for a decade. A platform built to scale across models, markets, devices and dealerships, all while upholding extremely high creative standards and delighting luxury shoppers.",
+      "titleImage": "/images/case-studies/lexus/keys.png"
+    },
+    {
+      "type": "iphone",
+      "src": "images/case-studies/lexus/home-mobile.jpg",
+      "alt": "Lexus.com mobile experience",
+      "caption": "Mobile-first design for responsive experience"
+    },
+    {
+      "type": "iphone",
+      "src": "images/case-studies/lexus/model-page-mobile.jpg",
+      "alt": "Lexus.com mobile experience - detail",
+      "caption": "Second view of the mobile experience"
+    },
+    {
+      "type": "image",
+      "src": "images/case-studies/lexus/lexus-1.jpg",
+      "alt": "Lexus design details",
+      "caption": "Immersive design details"
+    },
+    {
+      "type": "image",
+      "src": "images/case-studies/lexus/lexus-2.jpg",
+      "alt": "Lexus lifestyle imagery",
+      "caption": "Lifestyle integration"
+    },
+    {
+      "type": "image",
+      "src": "images/case-studies/lexus/lexus-3.jpg",
+      "alt": "Lexus content experience",
+      "caption": "Rich content experiences across the platform"
+    },
+    {
+      "type": "image",
+      "src": "images/case-studies/lexus/lexus-4.jpg",
+      "alt": "Lexus platform architecture",
+      "caption": "Modular platform architecture"
+    },
+    {
+      "type": "image",
+      "src": "images/case-studies/lexus/lexus-5.png",
+      "alt": "Lexus outcomes and learnings",
+      "caption": "Project outcomes and key learnings"
+    }
+  ]
+}

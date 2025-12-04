@@ -1,0 +1,81 @@
+{
+  "type": "case-study",
+  "id": "nano-banana",
+  "title": "Nano Banana Apps",
+  "client": "Nano Banana",
+  "role": "Creative Director",
+  "year": "2024",
+  "tags": ["web apps", "AI", "image editing", "Google Gemini"],
+  "overview": {
+    "challenge": "Create playful, accessible web applications that leverage Google's Gemini API for creative image editing.",
+    "solution": "A series of nano web apps that make AI-powered image editing fun and intuitive through focused, single-purpose experiences.",
+    "impact": "Four unique web apps that democratize creative image editing through simple, delightful interfaces."
+  },
+  "metrics": [
+    {
+      "label": "Apps Created",
+      "value": "4"
+    },
+    {
+      "label": "Technology",
+      "value": "Google Gemini API"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "Nano Banana Apps",
+      "description": "A series of playful creative tools built with Google's Gemini API. Each mini app focuses on a single expressive action. The result is AI powered image editing that is simple, fast, and fun. Small experiments with big personality.",
+      "titleImage": "/images/case-studies/nano-banana/banana.png"
+    },
+    {
+      "type": "iphone",
+      "src": "/images/case-studies/nano-banana/deletethem.png",
+      "alt": "DeleteThem.com - AI-powered object removal",
+      "caption": "DeleteThem.com - Remove unwanted objects from photos"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/nano-banana/deletethem2.png",
+      "alt": "DeleteThem.com interface",
+      "caption": "DeleteThem.com in action"
+    },
+    {
+      "type": "iphone",
+      "src": "/images/case-studies/nano-banana/fitswitcher.png",
+      "alt": "FitSwitcher.com - AI outfit transformation",
+      "caption": "FitSwitcher.com - Try on different outfits virtually"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/nano-banana/fitswitcher2.jpg",
+      "alt": "FitSwitcher.com interface",
+      "caption": "FitSwitcher.com in action"
+    },
+    {
+      "type": "iphone",
+      "src": "/images/case-studies/nano-banana/doosanddonts.png",
+      "alt": "DoosAndDonts.com - Hairstyle recommendations",
+      "caption": "DoosAndDonts.com - Discover your perfect hairstyle"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/nano-banana/doosanddonts2.jpg",
+      "alt": "DoosAndDonts.com interface",
+      "caption": "DoosAndDonts.com in action"
+    },
+    {
+      "type": "iphone",
+      "src": "/images/case-studies/nano-banana/furstyler.png",
+      "alt": "FurStyler.com - Pet grooming visualizer",
+      "caption": "FurStyler.com - Visualize grooming styles for your pet"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/nano-banana/furstyler2.jpg",
+      "alt": "FurStyler.com interface",
+      "caption": "FurStyler.com in action"
+    }
+  ]
+}
+

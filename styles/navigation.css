@@ -1,5 +1,66 @@
 /* Navigation Styles */
 
+/* UI Layer - Overlay that fades in/out */
+.ui-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.ui-layer.hidden {
+    opacity: 0;
+}
+
+/* On mobile, keep theme controls and music controls visible even when UI is hidden */
+@media (max-width: 768px) {
+    /* Override parent opacity for these specific controls */
+    .ui-layer.hidden {
+        opacity: 1; /* Keep ui-layer visible on mobile */
+    }
+    
+    /* But hide the specific elements we don't want */
+    .ui-layer.hidden .ui-layer-content,
+    .ui-layer.hidden .sidebar {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+    
+    /* And keep theme/music controls visible */
+    .ui-layer.hidden .theme-controls,
+    .ui-layer.hidden .music-controls {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+    }
+}
+
+/* UI Layer Content - Navigation container */
+.ui-layer-content {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    pointer-events: none;
+    padding-left: 0;
+}
+
+/* Theme Controls - Top right corner */
+.ui-layer .theme-controls {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: var(--spacing-lg);
+    z-index: 101;
+    pointer-events: auto;
+}
+
 .sidebar {
     width: 280px;
     min-width: 280px;
@@ -14,16 +75,44 @@
     overflow-y: auto;
     overflow-x: visible;
     opacity: 0;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    
+    /* Desktop default state: hidden to the left */
+    transform: translateX(-100%);
 }
 
-/* Sidebar animation now handled by GSAP in app.js */
+/* Scrollable navigation area that hides/shows */
+.nav-content {
+    flex: 1;
+    overflow-y: visible; /* Let sidebar handle scroll */
+    overflow-x: hidden;
+    /* Removed independent hiding logic */
+    opacity: 1;
+    transform: none;
+    transition: none;
+    padding-bottom: 20px;
+}
+
+/* Visible state for desktop auto-hide */
+@media (min-width: 769px) {
+    .sidebar.visible {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.sidebar.hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
 
 .sidebar-header {
     padding: var(--spacing-xl) var(--spacing-lg);
     background-color: transparent;
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 10;
+    pointer-events: auto;
 }
 
 .logo-container {
@@ -59,6 +148,7 @@
     flex: 1;
     padding: var(--spacing-md) 0;
     padding-bottom: var(--spacing-xl);
+    pointer-events: auto;
 }
 
 .nav-group {
@@ -80,7 +170,7 @@
 
 .nav-group-title {
     font-size: var(--font-size-xs);
-    font-weight: var(--font-weight-semibold);
+    font-weight: 900; /* Bolder weight as requested */
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--color-text-primary);
@@ -98,9 +188,9 @@
     color: var(--color-accent);
 }
 
+/* Hide icons in nav groups */
 .nav-group-title > i:first-child {
-    font-size: 16px;
-    opacity: 0.7;
+    display: none;
 }
 
 .nav-group-chevron {
@@ -196,38 +286,39 @@
 }
 
 .nav-link.active {
-    color: var(--color-accent) !important;
-    font-weight: var(--font-weight-semibold);
-    border: 2px solid var(--color-accent);
+    color: var(--color-text-primary) !important;
+    font-weight: var(--font-weight-bold);
+    border: 2px solid var(--color-text-primary);
 }
 
 .nav-link.active::before {
     right: 0;
-    background-color: var(--color-bg-tertiary);
+    background-color: transparent;
+    opacity: 1;
 }
 
 .nav-link.active .nav-link-icon,
 .nav-link.active .nav-link-text {
-    color: var(--color-accent) !important;
+    color: var(--color-text-primary) !important;
     transition: color 0.3s ease;
 }
 
 /* Mobile refinements - ensure full coverage */
 @media (max-width: 768px) {
     .nav-link.active {
-        color: var(--color-accent) !important;
-        font-weight: var(--font-weight-semibold);
-        border: 2px solid var(--color-accent);
+        color: var(--color-text-primary) !important;
+        font-weight: var(--font-weight-bold);
+        border: 2px solid var(--color-text-primary);
     }
     
     .nav-link.active::before {
         right: 0;
-        background-color: var(--color-bg-tertiary);
+        background-color: transparent;
     }
 
     .nav-link.active .nav-link-icon,
     .nav-link.active .nav-link-text {
-        color: var(--color-accent) !important;
+        color: var(--color-text-primary) !important;
     }
 }
 
@@ -303,14 +394,15 @@
 .main-content {
     flex: 1;
     overflow: hidden;
-    background-color: var(--color-bg-primary);
+    /* Transparent background to allow body color to show through */
+    background-color: transparent;
     position: fixed;
     top: 0;
     left: 0;
     opacity: 0; /* Start hidden - GSAP will animate */
     width: 100vw;
     height: 100vh;
-    z-index: 1;
+    z-index: 10; /* Ensure content sits above background tint (z-index: 0) */
 }
 
 /* Hero Container - fullscreen without padding */
@@ -342,21 +434,22 @@
     width: 44px;
     height: 44px;
     border: none;
-    background: var(--color-bg-tertiary);
+    background: transparent;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-fast);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 .theme-toggle:hover,
 .mobile-preview-toggle:hover {
-    background: var(--color-bg-tertiary);
+    background: transparent;
     transform: scale(1.05);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
+    opacity: 0.8;
 }
 
 .theme-toggle i,
@@ -383,15 +476,32 @@
 .content-header {
     display: none;
     padding: var(--spacing-3xl) var(--spacing-3xl) var(--spacing-xl);
-    background-color: var(--color-bg-primary);
-    border-bottom: 1px solid var(--color-border-light);
+    background-color: transparent;
+    border-bottom: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    width: 100%;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0; /* Hidden by default */
 }
+
+/* Removed CSS binding to body.nav-visible. Controlled via JS now. */
+/* body.nav-visible .content-header {
+    opacity: 1;
+} */
 
 .page-title {
     font-size: 100px;
     margin-bottom: var(--spacing-sm);
     min-height: 44px;
     white-space: nowrap;
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    text-align: center;
 }
 
 /* Hide line break on desktop for single-line title */
@@ -403,9 +513,13 @@
 
 .page-description {
     font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary); /* Changed to primary color */
     line-height: var(--line-height-relaxed);
     min-height: 24px;
+    text-align: center; /* Added for centering */
+    width: 100%; /* Ensure it spans width for centering */
+    margin: 0 auto; /* Center block element if needed */
+    font-weight: 600; /* Heavier weight as requested */
 }
 
 /* Disable transitions during typing to prevent iOS rendering issues */
@@ -435,13 +549,13 @@
     top: var(--spacing-lg);
     left: var(--spacing-lg);
     padding: 0;
-    background: var(--color-bg-tertiary);
+    background: transparent;
     border-radius: 50%;
     cursor: pointer;
     transition: left var(--transition-base), top var(--transition-base), background var(--transition-fast), box-shadow var(--transition-fast);
     border: none;
-    box-shadow: var(--shadow-sm);
-    z-index: 101;
+    box-shadow: none;
+    z-index: 2001; /* Ensure it's above home state title (1000) */
     width: 44px;
     height: 44px;
     align-items: center;
@@ -449,9 +563,9 @@
 }
 
 .mobile-menu-toggle:hover {
-    background: var(--color-bg-tertiary);
+    background: transparent;
     transform: scale(1.05);
-    box-shadow: var(--shadow-sm);
+    box-shadow: none;
 }
 
 /* Mobile Navigation Hamburger - Specific styles to avoid conflicts */
@@ -529,11 +643,11 @@
 
 /* Active state styling - same background as default */
 .mobile-menu-toggle.active {
-    background: var(--color-bg-tertiary);
+    background: transparent;
 }
 
 .mobile-menu-toggle.active:hover {
-    background: var(--color-bg-tertiary);
+    background: transparent;
     transform: scale(1.05);
 }
 
@@ -601,7 +715,7 @@
         opacity: 1 !important;
         transform: translateX(calc(-100% - 5px));
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 99;
+        z-index: 2000; /* High z-index to ensure it's above everything on mobile including home state overlay (1000) */
         will-change: transform;
         background-color: rgba(245, 245, 247, 0.95);
         backdrop-filter: blur(20px);
@@ -699,3 +813,63 @@
     }
 }
 
+
+/* Standalone nav items (About, Contact) */
+.nav-standalone {
+    margin-bottom: 8px;
+}
+
+.nav-standalone .nav-group-title {
+    border-radius: 8px;
+    margin: 4px 8px;
+    padding: 12px 16px;
+}
+
+.nav-standalone .nav-group-title:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+}
+
+.nav-standalone .nav-group-title.active {
+    background: var(--color-surface-active);
+    color: var(--color-primary);
+}
+
+.nav-clickable {
+    position: relative;
+}
+
+.nav-clickable::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: var(--color-primary);
+    border-radius: 2px;
+    transition: height 0.3s ease;
+}
+
+.nav-clickable.active::before {
+    height: 20px;
+}
+
+/* Cleanup of old responsive classes */
+/* Desktop: Show regular nav now */
+@media (min-width: 769px) {
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .nav-content {
+        flex: 1;
+        /* Align to top left instead of center */
+        display: block; 
+    }
+}

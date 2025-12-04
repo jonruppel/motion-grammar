@@ -118,6 +118,19 @@
     --color-skeleton-shimmer: #38383a;
 }
 
+/* Dynamic Background Tint Layer */
+.global-tint-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--current-tint-color, transparent);
+    pointer-events: none;
+    z-index: 1; /* Above body background, below content */
+    transition: background-color 0.5s ease;
+}
+
 /* Page Loader */
 .page-loader {
     position: fixed;
@@ -201,6 +214,10 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: 100%;
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
 }
 
 body {
@@ -209,7 +226,23 @@ body {
     line-height: var(--line-height-normal);
     color: var(--color-text-primary);
     background-color: var(--color-bg-primary);
-    overflow-x: hidden;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    /* Prevent pull-to-refresh and overscroll bounce on iOS */
+    overscroll-behavior-y: none;
+    touch-action: pan-y;
+}
+
+/* Additional iOS-specific fixes for bounce prevention */
+@supports (-webkit-touch-callout: none) {
+    body {
+        /* iOS Safari specific */
+        -webkit-overflow-scrolling: auto;
+    }
 }
 
 /* Typography */
@@ -308,10 +341,16 @@ input, select, textarea, label {
 
 /* App Container */
 .app-container {
-    position: relative;
-    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
+    height: 100%;
     overflow: hidden;
+    z-index: 2; /* Ensure above global-tint-layer */
+    overscroll-behavior: none;
 }
 
 /* Hide default scrollbars everywhere */
@@ -356,6 +395,14 @@ input, select, textarea, label {
     scrollbar-width: thin !important;
     scrollbar-color: var(--color-border) transparent !important;
     -ms-overflow-style: auto !important;
+}
+
+.main-content {
+    width: 100%;
+    pointer-events: auto;
+    transition: transform 0.3s ease;
+    transform-origin: center;
+    transform-style: preserve-3d;
 }
 
 /* ===== BUTTON SYSTEM (Apple-inspired) ===== */
@@ -826,6 +873,17 @@ section {
     height: 100%;
     opacity: 1;
     pointer-events: auto; /* Enable pointer events for blob dragging */
+}
+
+.cell-game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    pointer-events: auto; /* Enable pointer events for cell dragging */
+    touch-action: none; /* Disable browser default touch gestures (swipe, pinch) */
 }
 
 .forest-canvas {

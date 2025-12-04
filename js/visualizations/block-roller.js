@@ -37,15 +37,30 @@ export class BlockRoller {
         this.rollEndPos = null;
         this.rollProgress = 0;
         this.rollSpeed = 0.05; // Much faster rolling
+        this.baseRollSpeed = 0.05; // Base speed for audio modulation
         this.rollAxis = null;
         this.rollPivot = null;
         
+        // Audio reactivity
+        this.smoothedEnergy = 0;
+        
         // Camera orbit - true isometric angle
         this.cameraAngle = 0;
-        this.cameraOrbitSpeed = 0.002; // Much faster orbit
+        this.cameraOrbitSpeed = 0.0005; // Slower orbit
+        this.baseCameraOrbitSpeed = 0.0005; // Base speed for audio modulation
         this.cameraDistance = 15;
         this.cameraHeight = 15; // Equal distance for true isometric (45° angle)
         this.lightOffset = Math.PI / 2; // 90 degree offset from camera
+        
+        // Beat detection
+        this.lastBeatTime = 0;
+        this.beatThreshold = 0.35; // Lower threshold for higher sensitivity
+        this.beatCooldown = 300; // ms
+        
+        // Turn-based logic
+        this.isPredatorTurn = true;
+        this.predatorMoveCount = 0;
+        this.currentTargetCompanion = null;
         
         this.init();
     }
@@ -80,14 +95,12 @@ export class BlockRoller {
         // Start animation
         this.start();
         
-        // Start rolling after a moment
-        setTimeout(() => this.startRolling(), 1000);
+        // Start rolling logic removed - now driven by audio beat
     }
     
     setupThemeObserver() {
         // Watch for theme changes on both body and html elements
         const observer = new MutationObserver((mutations) => {
-            console.log('Theme mutation detected:', mutations);
             this.updateThemeColors();
         });
         
@@ -108,17 +121,11 @@ export class BlockRoller {
     }
     
     updateThemeColors() {
-        console.log('updateThemeColors called');
         
         // Get new colors from CSS variables
         const newBgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-primary') || '#ffffff';
         const newGroundColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-secondary') || '#f5f5f7';
         const newCompanionColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') || '#86868b';
-        
-        console.log('New BG Color:', newBgColor);
-        console.log('New Ground Color:', newGroundColor);
-        console.log('New Companion Color:', newCompanionColor);
-        console.log('Ground exists:', !!this.ground);
         
         // Create target colors
         const targetBgColor = new THREE.Color(newBgColor.trim());
@@ -140,7 +147,6 @@ export class BlockRoller {
         
         // Animate ground color transition
         if (this.ground && this.ground.material) {
-            console.log('Animating ground color from', this.ground.material.color, 'to', targetGroundColor);
             const currentGroundColor = { 
                 r: this.ground.material.color.r, 
                 g: this.ground.material.color.g, 
@@ -156,8 +162,6 @@ export class BlockRoller {
                     this.ground.material.color.setRGB(currentGroundColor.r, currentGroundColor.g, currentGroundColor.b);
                 }
             });
-        } else {
-            console.warn('Ground or ground material not found');
         }
         
         // Animate all companion cube colors to match new secondary text color
@@ -235,12 +239,10 @@ export class BlockRoller {
         // Get ground color from CSS variable (slightly darker than background)
         const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--color-bg-secondary') || '#f5f5f7';
         
-        // Create ground plane with Phong material for specularity
+        // Create ground plane with Basic material for flat color (no lighting gradient)
         const groundGeometry = new THREE.PlaneGeometry(this.gridSize * 2, this.gridSize * 2);
-        const groundMaterial = new THREE.MeshPhongMaterial({ 
-            color: bgColor.trim(),
-            shininess: 15, // Low shininess for subtle specularity
-            specular: 0x444444 // Subtle gray specular highlight
+        const groundMaterial = new THREE.MeshBasicMaterial({ 
+            color: bgColor.trim()
         });
         this.ground = new THREE.Mesh(groundGeometry, groundMaterial);
         this.ground.rotation.x = -Math.PI / 2;
@@ -308,6 +310,9 @@ export class BlockRoller {
                 this.blockSize / 2,
                 position.y
             );
+            // Initialize base Y for audio hopping
+            cube.userData.baseY = this.blockSize / 2;
+            
             this.scene.add(cube);
             
             this.companionCubes.push(cube);
@@ -346,6 +351,57 @@ export class BlockRoller {
     animate() {
         if (!this.isRunning) return;
         
+        // Audio reactivity
+        let audioEnergy = 0;
+        let audioData = null;
+        let volume = 1.0;
+        
+        if (window.audioAnalyser) {
+            const bufferLength = window.audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            window.audioAnalyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for(let i=0; i<bufferLength; i++) sum += dataArray[i];
+            const avg = sum / bufferLength;
+            // Apply volume scaling
+            volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+            
+            if (avg > 10) { // Threshold
+                audioEnergy = (avg / 255) * volume;
+                audioData = dataArray;
+            }
+        }
+        
+        this.currentAudioEnergy = audioEnergy;
+        this.currentAudioData = audioData; // Store for per-tile visualization
+        
+        // Smooth energy
+        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        
+        // Beat Detection
+        const now = Date.now();
+        // Dynamic threshold relative to recent average (simple approach)
+        // Or fixed threshold scaled by volume
+        const beatTrigger = (audioEnergy > this.beatThreshold * volume);
+        
+        // Auto-beat fallback: if no beat for 500ms (0.5 second), trigger one automatically
+        // This ensures movement continues even in silence or low energy
+        const fallbackInterval = 500;
+        const autoBeat = (now - this.lastBeatTime > fallbackInterval);
+        
+        if ((beatTrigger && (now - this.lastBeatTime > this.beatCooldown)) || autoBeat) {
+            this.lastBeatTime = now;
+            this.onBeat();
+        }
+        
+        // Modulate speeds based on energy
+        // Roll speed: Base + up to 3x boost from energy
+        this.rollSpeed = this.baseRollSpeed * (1 + this.smoothedEnergy * 3);
+        
+        // Camera orbit: Base + up to 4x boost from energy
+        this.cameraOrbitSpeed = this.baseCameraOrbitSpeed * (1 + this.smoothedEnergy * 4);
+        
         this.update();
         this.updateCamera();
         this.updateTrailVisuals();
@@ -355,41 +411,75 @@ export class BlockRoller {
     }
     
     updateTrailVisuals() {
-        // Update main cube trail tiles
-        this.trailMeshes.forEach((mesh, index) => {
-            const age = this.trailMeshes.length - index;
-            
-            // Only the oldest tile (10th step) scales down
-            if (index === 0 && this.trailMeshes.length >= this.maxTrailLength) {
-                // This is the oldest tile about to be removed
-                // Animate it to scale 0 and fade out
-                const progress = mesh.userData.fadeProgress || 0;
-                mesh.userData.fadeProgress = Math.min(progress + 0.05, 1);
-                
-                const scale = 1.0 - mesh.userData.fadeProgress;
-                mesh.scale.set(scale, scale, scale);
-                mesh.material.opacity = (1.0 - mesh.userData.fadeProgress) * 0.8;
+        const energy = this.currentAudioEnergy || 0;
+        const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+        
+        // Define "hot" color for high energy (Bright Red/Orange)
+        const hotColor = new THREE.Color(1, 0.2, 0); 
+        
+        // Get accent color for resetting
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent') || '#0071e3';
+        const baseColor = new THREE.Color(accentColor.trim());
+
+        // Update Central Cube Color
+        if (this.cube && this.cube.material) {
+             // Boost sensitivity: multiply energy by 2.5 instead of 1.5
+             const mix = Math.min(Math.pow(energy * 2.5, 2), 1);
+             this.cube.material.color.lerpColors(baseColor, hotColor, mix);
+             // Store current color to use when placing trails
+             this.currentCubeColor = this.cube.material.color.clone();
+        }
+
+        // Helper to fade only opacity
+        const updateOpacity = (mesh, index, total, isCompanion) => {
+             // Fading (Oldest tile only)
+            if (index === 0 && total >= this.maxTrailLength) {
+                 const progress = mesh.userData.fadeProgress || 0;
+                 mesh.userData.fadeProgress = Math.min(progress + 0.05, 1);
+                 mesh.material.opacity = (1.0 - mesh.userData.fadeProgress) * (isCompanion ? 0.6 : 0.8);
             } else {
-                // All other tiles stay at full size and opacity
-                mesh.scale.set(1, 1, 1);
-                mesh.material.opacity = 0.8;
+                 mesh.material.opacity = isCompanion ? 0.6 : 0.8;
+            }
+        };
+
+        // Update main cube trail tiles (Opacity AND Scale updates)
+        this.trailMeshes.forEach((mesh, index) => {
+            updateOpacity(mesh, index, this.trailMeshes.length, false);
+            
+            // Sync color with predator
+            if (this.cube && this.cube.material) {
+                mesh.material.color.copy(this.cube.material.color);
+            }
+            
+            // Continuous audio reaction for scale
+            if (this.currentAudioData && mesh.userData.assignedFreqIndex !== undefined && mesh.userData.assignedFreqIndex !== -1) {
+                const amplitude = this.currentAudioData[mesh.userData.assignedFreqIndex];
+                const normalizedAmp = (amplitude / 255.0) * volume;
+                
+                // "louder the noise, the smaller the tile"
+                let targetScale = 0.9 * (1.0 - (normalizedAmp * 0.7));
+                targetScale = Math.max(0.2, targetScale);
+                
+                mesh.scale.x += (targetScale - mesh.scale.x) * 0.2;
+                mesh.scale.y += (targetScale - mesh.scale.y) * 0.2;
             }
         });
         
         // Update companion trail tiles
-        this.companionTrailMeshes.forEach((trailMeshes, companionIndex) => {
+        this.companionTrailMeshes.forEach((trailMeshes) => {
             trailMeshes.forEach((mesh, index) => {
-                // Only the oldest tile scales down
-                if (index === 0 && trailMeshes.length >= this.maxTrailLength) {
-                    const progress = mesh.userData.fadeProgress || 0;
-                    mesh.userData.fadeProgress = Math.min(progress + 0.05, 1);
+                updateOpacity(mesh, index, trailMeshes.length, true);
+                
+                // Continuous audio reaction for scale (Same logic as main tiles)
+                if (this.currentAudioData && mesh.userData.assignedFreqIndex !== undefined && mesh.userData.assignedFreqIndex !== -1) {
+                    const amplitude = this.currentAudioData[mesh.userData.assignedFreqIndex];
+                    const normalizedAmp = (amplitude / 255.0) * volume;
                     
-                    const scale = 1.0 - mesh.userData.fadeProgress;
-                    mesh.scale.set(scale, scale, scale);
-                    mesh.material.opacity = (1.0 - mesh.userData.fadeProgress) * 0.6;
-                } else {
-                    mesh.scale.set(1, 1, 1);
-                    mesh.material.opacity = 0.6;
+                    let targetScale = 0.9 * (1.0 - (normalizedAmp * 0.7));
+                    targetScale = Math.max(0.2, targetScale);
+                    
+                    mesh.scale.x += (targetScale - mesh.scale.x) * 0.2;
+                    mesh.scale.y += (targetScale - mesh.scale.y) * 0.2;
                 }
             });
         });
@@ -429,6 +519,35 @@ export class BlockRoller {
         }
     }
     
+    onBeat() {
+        if (this.isPredatorTurn) {
+            // Beat 1: Predator moves
+            this.stepPredator();
+        } else {
+            // Beat 2: All prey move away
+            this.stepAllPrey();
+        }
+        
+        // Alternate turns
+        this.isPredatorTurn = !this.isPredatorTurn;
+    }
+
+    stepPredator() {
+        // Don't interrupt if already rolling
+        if (this.isRolling) return;
+        
+        this.startRolling();
+    }
+
+    stepAllPrey() {
+        // Trigger reaction for all non-moving prey
+        this.companionData.forEach((data, index) => {
+            if (!data.isMoving) {
+                this.companionCubeReact(data, index);
+            }
+        });
+    }
+
     update() {
         // Update main cube
         if (this.isRolling && this.rollEndPos) {
@@ -451,15 +570,9 @@ export class BlockRoller {
                 // blockPosition.y is actually the Z coordinate in 3D space
                 this.addToTrail(this.blockPosition.x, this.blockPosition.y);
                 
-                // Make all companion cubes react with random delays
-                this.companionData.forEach((data, index) => {
-                    // Set random delay between 0 and 0.5 seconds
-                    data.reactionDelay = Math.random() * 0.5;
-                    data.reactionTimer = data.reactionDelay;
-                });
+                // Note: Reaction logic moved to onBeat()
                 
-                // Start next roll after a brief pause
-                setTimeout(() => this.startRolling(), 200);
+                // Removed: setTimeout(() => this.startRolling(), 200);
             } else {
                 // Animate rolling
                 this.animateRoll();
@@ -468,15 +581,7 @@ export class BlockRoller {
         
         // Update all companion cubes
         this.companionData.forEach((data, index) => {
-            // Handle reaction delay countdown
-            if (data.reactionTimer > 0) {
-                data.reactionTimer -= 0.016; // Approximate frame time
-                if (data.reactionTimer <= 0) {
-                    data.reactionTimer = 0;
-                    // Trigger the actual reaction now
-                    this.executeCompanionReaction(data, index);
-                }
-            }
+            // Removed: reaction timer logic (now triggered by onBeat)
             
             // Update movement animation
             if (data.isMoving && data.endPos) {
@@ -596,49 +701,99 @@ export class BlockRoller {
         const dz = data.position.y - this.blockPosition.y;
         const distance = Math.sqrt(dx * dx + dz * dz);
         
-        // Desired range: stay between 2-4 units away
-        const minDistance = 2;
-        const maxDistance = 4;
+        // Dynamic zones based on rules:
+        // 1. "try to get further from the predator. If they are within four spaces."
+        // 2. "pray never wanna be more than five blocks away"
         
-        let directions = [];
+        const fleeDistance = 4;
+        const maxTetherDistance = 5;
         
-        if (distance < minDistance) {
-            // Too close! Move away
-            const awayX = dx > 0 ? 1 : (dx < 0 ? -1 : 0);
-            const awayZ = dz > 0 ? 1 : (dz < 0 ? -1 : 0);
+        let possibleMoves = [];
+        
+        // Define all possible moves
+        const moves = [
+            { x: 1, z: 0 }, { x: -1, z: 0 }, { x: 0, z: 1 }, { x: 0, z: -1 }
+        ];
+        
+        // Always try to move if triggered by beat
+        
+        if (distance <= fleeDistance) {
+            // ZONE 1: Too close! (<= 4) -> Flee
             
-            // Primary escape directions (directly away)
-            if (awayX !== 0) directions.push({ x: awayX, z: 0, priority: 1 });
-            if (awayZ !== 0) directions.push({ x: 0, z: awayZ, priority: 1 });
+            // Evaluate moves to maximize distance
+            moves.forEach(move => {
+                const newX = data.position.x + move.x;
+                const newZ = data.position.y + move.z;
+                const newDx = newX - this.blockPosition.x;
+                const newDz = newZ - this.blockPosition.y;
+                const newDist = Math.sqrt(newDx * newDx + newDz * newDz);
+                
+                // Prioritize moves that increase distance
+                if (newDist > distance) {
+                    // Priority: larger distance is better.
+                    // We sort ascending by priority value.
+                    // So priority = 1 / distance (smaller value = larger distance = better)
+                    possibleMoves.push({ ...move, priority: 1 / newDist }); 
+                }
+            });
             
-            // Secondary escape directions (diagonal)
-            if (awayX !== 0 && awayZ !== 0) {
-                directions.push({ x: awayX, z: awayZ, priority: 2 });
+            // If cornered (no move increases distance), try any move to keep moving
+            if (possibleMoves.length === 0) {
+                 moves.forEach(move => {
+                    const newX = data.position.x + move.x;
+                    const newZ = data.position.y + move.z;
+                    const newDx = newX - this.blockPosition.x;
+                    const newDz = newZ - this.blockPosition.y;
+                    const newDist = Math.sqrt(newDx * newDx + newDz * newDz);
+                    possibleMoves.push({ ...move, priority: 1 / newDist });
+                 });
             }
             
-        } else if (distance > maxDistance) {
-            // Too far! Move closer
-            const towardsX = dx < 0 ? 1 : (dx > 0 ? -1 : 0);
-            const towardsZ = dz < 0 ? 1 : (dz > 0 ? -1 : 0);
+        } else if (distance > maxTetherDistance) {
+            // ZONE 2: Too far! (> 5) -> Approach
             
-            // Primary approach directions (directly towards)
-            if (towardsX !== 0) directions.push({ x: towardsX, z: 0, priority: 1 });
-            if (towardsZ !== 0) directions.push({ x: 0, z: towardsZ, priority: 1 });
+             moves.forEach(move => {
+                const newX = data.position.x + move.x;
+                const newZ = data.position.y + move.z;
+                const newDx = newX - this.blockPosition.x;
+                const newDz = newZ - this.blockPosition.y;
+                const newDist = Math.sqrt(newDx * newDx + newDz * newDz);
+                
+                // Prioritize moves that DECREASE distance
+                if (newDist < distance) {
+                    // Priority: smaller distance is better.
+                    // We sort ascending by priority value.
+                    // So priority = newDist (smaller value = smaller distance = better)
+                    possibleMoves.push({ ...move, priority: newDist }); 
+                }
+            });
             
-            // Secondary approach directions (diagonal)
-            if (towardsX !== 0 && towardsZ !== 0) {
-                directions.push({ x: towardsX, z: towardsZ, priority: 2 });
+             // Fallback if blocked
+            if (possibleMoves.length === 0) {
+                 moves.forEach(move => {
+                    const newX = data.position.x + move.x;
+                    const newZ = data.position.y + move.z;
+                    const newDx = newX - this.blockPosition.x;
+                    const newDz = newZ - this.blockPosition.y;
+                    const newDist = Math.sqrt(newDx * newDx + newDz * newDz);
+                    possibleMoves.push({ ...move, priority: newDist });
+                 });
             }
-            
+
         } else {
-            // In sweet spot - maybe orbit/stay put or move randomly
-            return;
+            // ZONE 3: Sweet spot (4 < distance <= 5) -> Wander
+            // Shuffle moves and give them equal priority
+            for (let i = moves.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [moves[i], moves[j]] = [moves[j], moves[i]];
+            }
+            moves.forEach(move => possibleMoves.push({ ...move, priority: 1 }));
         }
         
         const gridBounds = this.gridSize / 2;
         
         // Filter valid directions (check grid bounds AND collision with other cubes)
-        const validDirections = directions.filter(dir => {
+        const validDirections = possibleMoves.filter(dir => {
             const newX = data.position.x + dir.x;
             const newZ = data.position.y + dir.z;
             
@@ -647,16 +802,18 @@ export class BlockRoller {
                 return false;
             }
             
-            // Check collision with main cube
+            // Check collision with main cube (Predator)
+            // Even if alternating turns, don't walk INTO the predator
             if (newX === this.blockPosition.x && newZ === this.blockPosition.y) {
                 return false;
             }
             
             // Check collision with other companion cubes (current position AND target position)
+            // CRITICAL: Prey must NEVER occupy the same tile
             const wouldCollide = this.companionData.some((otherData, otherIndex) => {
                 if (otherIndex === index) return false; // Don't check against self
                 
-                // Check current position
+                // Check current position of others
                 if (otherData.position.x === newX && otherData.position.y === newZ) {
                     return true;
                 }
@@ -745,24 +902,52 @@ export class BlockRoller {
                 Math.round(endZ)
             );
             cube.rotation.set(0, 0, 0);
+            cube.userData.baseY = halfSize;
         } else {
             cube.position.set(
                 startX + offsetX,
                 offsetY,
                 startZ + offsetZ
             );
+            cube.userData.baseY = offsetY;
         }
     }
     
     startRolling() {
         if (this.isRolling) return;
         
-        // Randomly select a companion cube to chase
+        // Find nearest companion to chase
         if (this.companionData.length === 0) {
             return;
         }
         
-        const targetCompanion = this.companionData[Math.floor(Math.random() * this.companionData.length)];
+        // Update target logic:
+        // 1. Initial target selection (if none exists)
+        // 2. Switch target every 4 moves
+        // 3. Re-acquire target if current target is somehow invalid (though we don't delete companions currently)
+        
+        this.predatorMoveCount++;
+        const shouldSwitchTarget = (this.predatorMoveCount % 4 === 0) || !this.currentTargetCompanion;
+        
+        if (shouldSwitchTarget) {
+            // Prefer a DIFFERENT prey if possible
+            const availablePrey = this.companionData.filter(c => c !== this.currentTargetCompanion);
+            const searchPool = availablePrey.length > 0 ? availablePrey : this.companionData;
+
+            // "random decision between the three that it's currently not chasing with even chances"
+            if (searchPool.length > 0) {
+                const randomIndex = Math.floor(Math.random() * searchPool.length);
+                this.currentTargetCompanion = searchPool[randomIndex];
+            } else {
+                // Fallback if no prey available (shouldn't happen given check above)
+                this.currentTargetCompanion = null;
+            }
+        }
+        
+        // Safety check
+        if (!this.currentTargetCompanion) return;
+        
+        const targetCompanion = this.currentTargetCompanion;
         
         // Calculate direction towards target companion
         const dx = targetCompanion.position.x - this.blockPosition.x;
@@ -771,7 +956,8 @@ export class BlockRoller {
         const directions = [
             { x: 1, z: 0 },   // right
             { x: -1, z: 0 },  // left
-            { x: 0, z: 1 }    // forward
+            { x: 0, z: 1 },   // forward
+            { x: 0, z: -1 }    // backward
         ];
         
         // Prioritize directions that move towards the target
@@ -786,6 +972,8 @@ export class BlockRoller {
             // Lower distance = better (higher priority)
             return { ...dir, priority: newDistance };
         });
+        
+        // Remove randomness - Predator always picks optimal path towards target
         
         const gridBounds = this.gridSize / 2;
         
@@ -818,7 +1006,9 @@ export class BlockRoller {
             this.trail = [];
             
             this.addToTrail(0, 0);
-            setTimeout(() => this.startRolling(), 1000);
+            // Reset move count on reset
+            this.predatorMoveCount = 0;
+            this.currentTargetCompanion = null;
             return;
         }
         
@@ -880,9 +1070,22 @@ export class BlockRoller {
         // Create new main tile
         this.trail.push({ x, z });
         const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent') || '#0071e3';
-        const geometry = new THREE.PlaneGeometry(this.blockSize * 0.9, this.blockSize * 0.9);
+        
+        // Use current cube color if available (from audio reaction), otherwise default accent
+        const tileColor = this.currentCubeColor ? this.currentCubeColor : new THREE.Color(accentColor.trim());
+        
+        // Audio-reactive scale logic
+        let scale = 0.9; // Default size (100%)
+        let assignedFreqIndex = 0;
+        
+        if (this.currentAudioData) {
+            // Predator gets lowest frequencies (Bass)
+            assignedFreqIndex = 2;
+        }
+
+        const geometry = new THREE.PlaneGeometry(this.blockSize * scale, this.blockSize * scale);
         const material = new THREE.MeshBasicMaterial({ 
-            color: accentColor.trim(),
+            color: tileColor,
             opacity: 0.8,
             transparent: true,
             side: THREE.DoubleSide
@@ -893,6 +1096,7 @@ export class BlockRoller {
         tile.position.set(x, 0.002, z);
         tile.receiveShadow = true;
         tile.userData.tileType = 'main';
+        tile.userData.assignedFreqIndex = assignedFreqIndex;
         
         this.scene.add(tile);
         this.trailMeshes.push(tile);
@@ -915,7 +1119,18 @@ export class BlockRoller {
         // Create new companion tile
         this.companionTrails[companionIndex].push({ x, z });
         const companionColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') || '#86868b';
-        const geometry = new THREE.PlaneGeometry(this.blockSize * 0.9, this.blockSize * 0.9);
+        
+        // Audio-reactive scale setup
+        let assignedFreqIndex = 0;
+        let initialScale = 0.9; // Always start at full size (100%)
+        
+        if (this.currentAudioData) {
+            // Assign distinct frequency channels to each companion
+            // Starting from bin 8 (mid-bass) and spacing them out
+            assignedFreqIndex = 8 + (companionIndex * 4);
+        }
+
+        const geometry = new THREE.PlaneGeometry(this.blockSize * initialScale, this.blockSize * initialScale);
         const material = new THREE.MeshBasicMaterial({ 
             color: companionColor.trim(),
             opacity: 0.6,
@@ -929,6 +1144,8 @@ export class BlockRoller {
         tile.receiveShadow = true;
         tile.userData.tileType = 'companion';
         tile.userData.companionIndex = companionIndex;
+        tile.userData.baseColor = new THREE.Color(companionColor.trim());
+        tile.userData.assignedFreqIndex = assignedFreqIndex;
         
         this.scene.add(tile);
         this.companionTrailMeshes[companionIndex].push(tile);
@@ -993,7 +1210,19 @@ export class BlockRoller {
         
         // Create visual trail tile with secondary text color (uniform size)
         const companionColor = getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') || '#86868b';
-        const geometry = new THREE.PlaneGeometry(this.blockSize * 0.9, this.blockSize * 0.9);
+        
+        // Audio-reactive scale setup
+        let assignedFreqIndex = 0;
+        let initialScale = 0.9; // Always start at full size (100%)
+        
+        if (this.currentAudioData) {
+            // Assign distinct frequency channels to each companion
+            // Starting from bin 8 (mid-bass) and spacing them out
+            // Companion indices are 0-3
+            assignedFreqIndex = 8 + (companionIndex * 4);
+        }
+
+        const geometry = new THREE.PlaneGeometry(this.blockSize * initialScale, this.blockSize * initialScale);
         const material = new THREE.MeshBasicMaterial({ 
             color: companionColor.trim(),
             opacity: 0.6,
@@ -1007,6 +1236,8 @@ export class BlockRoller {
         tile.receiveShadow = true;
         tile.userData.tileType = 'companion'; // Mark as companion tile
         tile.userData.companionIndex = companionIndex;
+        tile.userData.baseColor = new THREE.Color(companionColor.trim()); // Store base color
+        tile.userData.assignedFreqIndex = assignedFreqIndex; // Store frequency assignment
         
         this.scene.add(tile);
         this.companionTrailMeshes[companionIndex].push(tile);
@@ -1037,11 +1268,25 @@ export class BlockRoller {
         // Always add new position to trail
         this.trail.push({ x, z });
         
-        // Create visual trail tile as a plane with flat color (uniform size with companions)
+        // Create visual trail tile as a plane with flat color
         const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--color-accent') || '#0071e3';
-        const geometry = new THREE.PlaneGeometry(this.blockSize * 0.9, this.blockSize * 0.9);
+        
+        // Use current cube color if available (from audio reaction), otherwise default accent
+        const tileColor = this.currentCubeColor ? this.currentCubeColor : new THREE.Color(accentColor.trim());
+
+        // Audio-reactive scale logic
+        let scale = 0.9; // Default size (100%)
+        let assignedFreqIndex = 0; // Default to 0
+        
+        if (this.currentAudioData) {
+            // Predator gets lowest frequencies (Bass)
+            // Using a low bin index for heavy bass response
+            assignedFreqIndex = 2; // Slightly offset from 0 to avoid potential DC offset issues
+        }
+
+        const geometry = new THREE.PlaneGeometry(this.blockSize * scale, this.blockSize * scale);
         const material = new THREE.MeshBasicMaterial({ 
-            color: accentColor.trim(),
+            color: tileColor,
             opacity: 0.8,
             transparent: true,
             side: THREE.DoubleSide
@@ -1052,6 +1297,7 @@ export class BlockRoller {
         tile.position.set(x, 0.002, z);
         tile.receiveShadow = true;
         tile.userData.tileType = 'main'; // Mark as main cube tile
+        tile.userData.assignedFreqIndex = assignedFreqIndex; // Store frequency assignment
         
         this.scene.add(tile);
         this.trailMeshes.push(tile);

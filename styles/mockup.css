@@ -1,0 +1,203 @@
+/* Mockup Mode Styles - iPhone Frame Overlay */
+
+/* Mockup controls */
+.ui-layer .mockup-controls {
+    position: absolute;
+    top: var(--spacing-lg);
+    right: calc(var(--spacing-lg) + 60px);
+    z-index: 101;
+    pointer-events: auto;
+}
+
+.mockup-toggle-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-surface-elevated);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    color: var(--color-text-primary);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.mockup-toggle-btn:hover {
+    opacity: 1;
+    transform: scale(1.05);
+    background: var(--color-surface-hover);
+}
+
+/* Mockup mode - resize content to iPhone aspect ratio */
+.mockup-mode {
+    overflow: hidden;
+}
+
+.mockup-mode body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mockup-mode .app-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mockup-mode .main-content {
+    position: relative;
+    width: 375px;
+    height: 812px;
+    margin: 0 !important;
+    transform: none !important;
+    overflow: hidden;
+    background: var(--color-bg-primary);
+    z-index: 50;
+    pointer-events: auto;
+}
+
+/* Hide UI layer in mockup mode */
+.mockup-mode .ui-layer {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.mockup-mode .sidebar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* iPhone frame overlay using CSS */
+.mockup-mode .main-content::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 399px;
+    height: 836px;
+    pointer-events: none;
+    z-index: 51;
+    background: 
+        /* Notch */
+        radial-gradient(135px at 50% -28px, transparent 135px, #000 135px, #000 150px, transparent 150px),
+        /* Bezel */
+        radial-gradient(50px at 0 0, transparent 50px, #000 50px),
+        radial-gradient(50px at 100% 0, transparent 50px, #000 50px),
+        radial-gradient(50px at 0 100%, transparent 50px, #000 50px),
+        radial-gradient(50px at 100% 100%, transparent 50px, #000 50px),
+        /* Main bezel color */
+        #000;
+    background-size: 100% 100%;
+    background-position: 0 0;
+    border: 12px solid #000;
+    border-radius: 50px;
+    box-shadow: 0 0 0 1px #ddd,
+                0 0 0 13px #000,
+                0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Home indicator overlay */
+.mockup-mode .main-content::after {
+    content: '';
+    position: fixed;
+    bottom: calc(50% - 394px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background: #000;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 52;
+}
+
+/* Close button */
+.mockup-close-btn {
+    position: fixed;
+    top: calc(50% - 386px);
+    right: calc(50% - 175px);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.mockup-close-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+    color: #ffffff;
+}
+
+/* Responsive mockup sizing for smaller screens */
+@media (max-width: 1200px) {
+    .mockup-mode .main-content {
+        width: 320px;
+        height: 694px;
+    }
+
+    .mockup-mode .main-content::before {
+        width: 344px;
+        height: 718px;
+        border-radius: 45px;
+        border: 10px solid #000;
+    }
+
+    .mockup-mode .main-content::after {
+        width: 100px;
+        height: 3px;
+        bottom: calc(50% - 336px);
+    }
+
+    .mockup-close-btn {
+        top: calc(50% - 334px);
+        right: calc(50% - 150px);
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .mockup-mode .main-content {
+        width: 280px;
+        height: 606px;
+    }
+
+    .mockup-mode .main-content::before {
+        width: 304px;
+        height: 630px;
+        border-radius: 40px;
+        border: 8px solid #000;
+    }
+
+    .mockup-mode .main-content::after {
+        width: 90px;
+        height: 2px;
+        bottom: calc(50% - 293px);
+    }
+
+    .mockup-close-btn {
+        top: calc(50% - 291px);
+        right: calc(50% - 130px);
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+}

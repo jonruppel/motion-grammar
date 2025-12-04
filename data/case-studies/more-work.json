@@ -1,0 +1,78 @@
+{
+  "type": "case-study",
+  "id": "more-work",
+  "title": "More Work",
+  "client": "Various",
+  "role": "Creative Director",
+  "year": "2024",
+  "tags": ["strategy", "branding", "innovation"],
+  "overview": {
+    "challenge": "Exploring new territories in design, strategy, and innovation requires constant experimentation and refinement of processes.",
+    "solution": "A collection of strategic initiatives, brand guidelines, and performance optimization frameworks developed to push creative boundaries.",
+    "impact": "Delivered comprehensive design systems and strategic roadmaps that have shaped the future direction of digital products."
+  },
+  "metrics": [
+    {
+      "label": "Focus",
+      "value": "Strategic Innovation"
+    },
+    {
+      "label": "Output",
+      "value": "Design Systems"
+    },
+    {
+      "label": "Impact",
+      "value": "Future Vision"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "More Work",
+      "description": "A collection of design systems, product explorations, and award winning projects created across industries. This includes work for global brands, emerging platforms, and new technology spaces.",
+      "titleImage": "/images/case-studies/more-work/cat.png"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0037-2160-1215.jpg",
+      "alt": "Performance optimization",
+      "caption": "Performance and optimization strategies"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0038-2160-1215.jpg",
+      "alt": "Analytics dashboard",
+      "caption": "Analytics and insights dashboard"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0039-2160-1215.jpg",
+      "alt": "Future roadmap",
+      "caption": "Future roadmap and vision"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0040-2160-1215.jpg",
+      "alt": "Outcomes and learnings",
+      "caption": "Project outcomes and key learnings"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0042-2160-1215.jpg",
+      "alt": "Thought Leadership 1",
+      "caption": "Thought Leadership"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0043-2160-1215.jpg",
+      "alt": "Thought Leadership 2",
+      "caption": "Thought Leadership"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/more-work/0044-2160-1215.jpg",
+      "alt": "Thought Leadership 3",
+      "caption": "Thought Leadership"
+    }
+  ]
+}

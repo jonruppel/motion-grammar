@@ -68,7 +68,7 @@ export class HomePage {
     renderSeparate(onCardClick) {
         // Hero (rendered separately, higher in DOM hierarchy)
         this.hero = new Hero({
-            title: 'Motion\nGrammar',
+            title: 'MOTION\nGRAMMAR',
             subtitle: 'Dynamic design systems'
         });
         this.components.push(this.hero);

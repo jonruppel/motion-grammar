@@ -59,6 +59,10 @@ export class BlobIK {
         this.rotationAngle = 0; // Track rotation of the boundary box
         this.gravity = this.settings.physics.gravity;
         
+        // Audio reactivity
+        this.smoothedEnergy = 0;
+        this.baseRotationSpeed = this.settings.physics.rotationSpeed;
+        
         // Drag state
         this.isDragging = false;
         this.draggedBlob = null;
@@ -273,6 +277,13 @@ export class BlobIK {
             indicator.position.y = 0;
             indicator.position.z = 0.01; // Slightly in front
             
+            // Indicator Physics Data - Bouncing around inside
+            indicator.userData = {
+                velocity: { x: 0, y: 0 },
+                radius: indicatorSize,
+                baseColor: indicatorMaterial.color.clone()
+            };
+            
             // Add indicator as child of blob so it rotates with it
             blob.add(indicator);
             
@@ -409,10 +420,35 @@ export class BlobIK {
         if (this.isPaused) return;
         this.animationId = requestAnimationFrame(() => this.animate());
         
+        // Audio reactivity
+        let audioEnergy = 0;
+        let audioData = null;
+        if (window.audioAnalyser) {
+            const bufferLength = window.audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            window.audioAnalyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for(let i=0; i<bufferLength; i++) sum += dataArray[i];
+            const avg = sum / bufferLength;
+            // Apply volume scaling
+            const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+            
+            if (avg > 10) {
+                audioEnergy = (avg / 255) * volume;
+                audioData = dataArray;
+            }
+        }
+        
+        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        
+        // Rotation speed (constant, removed audio modulation)
+        const currentRotationSpeed = this.settings.physics.rotationSpeed;
+        
         this.time += 0.016; // Approximate 60fps delta time
         
         // Update rotation angle for the boundary box - continuous rotation
-        this.rotationAngle += this.settings.physics.rotationSpeed * 0.016;
+        this.rotationAngle += currentRotationSpeed * 0.016;
         if (this.rotationAngle > Math.PI * 2) {
             this.rotationAngle -= Math.PI * 2;
         }
@@ -426,6 +462,78 @@ export class BlobIK {
         // Apply physics to blobs
         this.blobs.forEach((blob, i) => {
             const userData = blob.userData;
+            const indicator = blob.children[0]; // The accent-colored inner circle
+            
+            // Reset blob scale (don't scale the whole body)
+            blob.scale.set(1, 1, 1);
+            
+            // Audio reactivity for Inner Circle (Indicator) - Bouncing Physics
+            if (indicator) {
+                const iData = indicator.userData;
+                const limit = userData.baseSize * 0.9 - iData.radius; // Inner radius limit
+                
+                if (audioData) {
+                    const binIndex = Math.floor((i / this.blobs.length) * (audioData.length / 2));
+                    const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+                    const freqValue = (audioData[binIndex] / 255) * volume;
+                    
+                    // 1. Scale Pulse (Boosted sensitivity)
+                    const pulse = 1 + (freqValue * 5.0) + (this.smoothedEnergy * 0.8);
+                    indicator.scale.set(pulse, pulse, pulse);
+                    
+                    // 2. Color Pulse (Blue -> Red) - Sharp transition
+                    const redColor = new THREE.Color(1, 0, 0);
+                    // Create a steep curve to minimize purple state
+                    // 0.0-0.4 = Blue, 0.4-0.7 = Fast transition, 0.7+ = Red
+                    const threshold = 0.4;
+                    // Boost input frequency by 1.5x to trigger red more easily at lower volumes
+                    const mix = Math.max(0, Math.min(1, (freqValue * 1.5 - threshold) * 3));
+                    indicator.material.color.lerpColors(iData.baseColor, redColor, mix);
+                    
+                    // 3. Velocity Kick on Beat (Lower threshold)
+                    if (freqValue > 0.3) {
+                        const kick = freqValue * 0.08;
+                        iData.velocity.x += (Math.random() - 0.5) * kick;
+                        iData.velocity.y += (Math.random() - 0.5) * kick;
+                    }
+                } else {
+                    indicator.scale.set(1, 1, 1);
+                    indicator.material.color.copy(iData.baseColor);
+                }
+                
+                // Update position
+                indicator.position.x += iData.velocity.x;
+                indicator.position.y += iData.velocity.y;
+                
+                // Bounce off walls (Circular container)
+                const distSq = indicator.position.x**2 + indicator.position.y**2;
+                if (distSq > limit**2) {
+                    const dist = Math.sqrt(distSq);
+                    const nx = indicator.position.x / dist;
+                    const ny = indicator.position.y / dist;
+                    
+                    // Push back inside
+                    indicator.position.x = nx * limit;
+                    indicator.position.y = ny * limit;
+                    
+                    // Reflect velocity
+                    const dot = iData.velocity.x * nx + iData.velocity.y * ny;
+                    iData.velocity.x -= 2 * dot * nx;
+                    iData.velocity.y -= 2 * dot * ny;
+                    
+                    // Damping
+                    iData.velocity.x *= 0.8;
+                    iData.velocity.y *= 0.8;
+                }
+                
+                // Friction
+                iData.velocity.x *= 0.95;
+                iData.velocity.y *= 0.95;
+            } else if (indicator) {
+                // Should be covered above, but fallback
+                indicator.scale.set(1, 1, 1);
+                indicator.position.set(userData.baseSize * 0.5, 0, 0.01);
+            }
             
             // Skip physics for dragged blob
             if (this.isDragging && blob === this.draggedBlob) {
@@ -663,15 +771,26 @@ export class BlobIK {
                 
                 this.canvas.style.cursor = 'grabbing';
                 e.preventDefault();
+                
+                // Signal that visualization is using drag
+                window.isVisualizationDragging = true;
             }
         };
         
         // Mouse/touch up handler
-        this.handlePointerUp = () => {
+        this.handlePointerUp = (e) => {
             if (this.isDragging) {
                 this.isDragging = false;
                 this.draggedBlob = null;
                 this.canvas.style.cursor = 'grab';
+                
+                // Clear visualization drag flag
+                window.isVisualizationDragging = false;
+            }
+            
+            // Stop propagation to prevent app-level swipe handler from firing
+            if (this.isDragging) {
+                e.stopPropagation();
             }
         };
         

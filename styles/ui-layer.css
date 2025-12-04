@@ -1,0 +1,218 @@
+/* UI Layer Visibility Styles */
+
+/* App container with 3D perspective */
+.app-container {
+    perspective: 1200px;
+    transform-style: preserve-3d;
+}
+
+/* UI Layer - Fade and 3D zoom transitions */
+.ui-layer {
+    transition: opacity 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform-style: preserve-3d;
+    transform: scale3d(1, 1, 1) translateZ(0);
+}
+
+/* Hide UI layer on mouse inactivity - zoom out content, zoom in UI with 3D depth */
+.ui-hidden .ui-layer {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale3d(1.12, 1.12, 1) translateZ(80px);
+}
+
+.ui-hidden .sidebar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Main content zooms back with 3D depth when UI is hidden */
+.ui-hidden .main-content {
+    transform: scale3d(0.88, 0.88, 1) translateZ(-80px);
+}
+
+/* Hide pagination controls with UI layer */
+.horizontal-slider-controls {
+    transition: opacity 0.3s ease;
+}
+
+.horizontal-slider-controls.hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Tutorial Styles */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 1;
+}
+
+.tutorial-content {
+    max-width: 700px;
+    width: 90%;
+    padding: 60px;
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.9) 0%, rgba(30, 30, 45, 0.9) 100%);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.tutorial-step {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tutorial-step-content {
+    text-align: center;
+}
+
+.tutorial-icon {
+    font-size: 80px;
+    color: var(--color-primary);
+    margin-bottom: 32px;
+    opacity: 0.9;
+}
+
+.tutorial-icon i {
+    display: inline-block;
+}
+
+.tutorial-title {
+    font-size: 42px;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+.tutorial-description {
+    font-size: 20px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 32px;
+}
+
+.tutorial-hint {
+    display: inline-block;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.tutorial-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+}
+
+.tutorial-btn {
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tutorial-skip {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tutorial-skip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.tutorial-next {
+    background: var(--color-primary);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.tutorial-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+}
+
+.tutorial-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+}
+
+.tutorial-dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.tutorial-dot.active {
+    width: 24px;
+    border-radius: 4px;
+    background: var(--color-primary);
+}
+
+/* Mobile Tutorial */
+@media (max-width: 768px) {
+    .tutorial-content {
+        padding: 40px 32px;
+    }
+
+    .tutorial-icon {
+        font-size: 60px;
+    }
+
+    .tutorial-title {
+        font-size: 32px;
+    }
+
+    .tutorial-description {
+        font-size: 18px;
+    }
+
+    .tutorial-nav {
+        flex-direction: column-reverse;
+        gap: 12px;
+    }
+
+    .tutorial-btn {
+        width: 100%;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .fullscreen-mode .sidebar {
+        transition: none;
+    }
+
+    .tutorial-overlay * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+

@@ -23,7 +23,7 @@ export class Logo extends Component {
         const logoTitle = new Text({
             tag: 'h1',
             className: 'logo',
-            html: 'Motion<br>Grammar'
+            html: 'MOTION<br>GRAMMAR'
         });
         this.children.push(logoTitle);
         container.appendChild(logoTitle.render());

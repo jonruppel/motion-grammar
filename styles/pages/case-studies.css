@@ -1,0 +1,492 @@
+/* Case Studies & Horizontal Slider Styles */
+
+/* Lazy Image Loading Animation */
+img[data-lazy-src] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+img.lazy-loading {
+    opacity: 0;
+}
+
+img.lazy-loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+img.lazy-error {
+    opacity: 0.5;
+}
+
+/* Loading Spinner for images */
+.image-loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    margin: -12px 0 0 -12px;
+    border: 2px solid var(--color-text-primary);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spinner-rotate 0.8s linear infinite;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 10;
+}
+
+@keyframes spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.horizontal-slider {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    /* Transparent background so body color shows through */
+    background: transparent;
+    z-index: 10; /* Ensure above tint */
+}
+
+.horizontal-slider-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+}
+
+.horizontal-slide {
+    min-width: 100%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* Slide Content Types */
+.slide-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: slideContentFadeIn 0.6s ease-out;
+    position: relative;
+    /* Smooth scaling transition - Matched timing with Sidebar opacity */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    transform-origin: center center;
+}
+
+/* Scale down when navigation is visible to prevent overlap */
+/* Only affect fullscreen views (Image, Video), NOT mockups/devices */
+/* Only on desktop */
+@media (min-width: 769px) {
+    body.nav-visible .slide-content.slide-image,
+    body.nav-visible .slide-content.slide-video {
+        /* Scale down further (0.8) and shift right slightly to clear sidebar */
+        transform: scale(0.8) translateX(100px);
+        opacity: 1 !important; /* Ensure content stays fully visible */
+    }
+}
+
+@keyframes slideContentFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Overview Slide */
+.slide-overview {
+    max-width: 900px;
+    padding: 60px;
+    padding-top: 300px;
+    z-index: 10;
+    text-align: center;
+}
+
+.slide-title {
+    font-size: 88px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+}
+
+.slide-overview .slide-description {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 auto;
+    text-align: center;
+    max-width: 700px;
+}
+
+.slide-title-image {
+    display: block;
+    margin: 30px auto 0;
+    max-width: 450px;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Image Slide */
+.slide-image {
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.slide-image-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+}
+
+/* 
+ * Fullscreen Image Mode - Edge to Edge
+ * This affects standalone image slides (not inside mockups)
+ */
+.slide-image-element {
+    width: auto;
+    height: auto;
+    max-width: 85%;
+    max-height: 85%;
+    display: block;
+    padding: 0; 
+    box-sizing: border-box;
+    /* Big outer glow/shadow for depth */
+    box-shadow: 0 20px 100px rgba(0, 0, 0, 0.5);
+    border-radius: 4px; /* Slight radius for polish */
+    opacity: 1; /* Ensure full opacity */
+}
+
+/* Allow caption to overlap if needed, or push up content */
+.slide-caption {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--color-text-primary);
+    font-size: 16px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 12px 24px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    max-width: 80%;
+    z-index: 10;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .slide-image-element {
+        max-width: 95%;
+        max-height: 95%;
+    }
+}
+    transform: translateX(-50%);
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+    background: var(--color-bg-tertiary);
+    backdrop-filter: blur(10px);
+    padding: 12px 24px;
+    border-radius: 24px;
+    z-index: 10;
+    max-width: 80%;
+}
+
+/* Video Slide */
+.slide-video {
+    align-items: center;
+}
+
+.slide-video-container {
+    width: 100%;
+    max-height: 85vh; /* Increased from 70vh to match image slides */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    background: var(--color-bg-primary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.slide-video-element {
+    width: 100%;
+    height: auto;
+    max-height: 85vh; /* Increased from 70vh to match image slides */
+    display: block;
+}
+
+/* Text Slide (for About, etc.) */
+.slide-text {
+    max-width: 900px;
+    padding: 60px;
+    text-align: center;
+}
+
+.slide-text.has-title-image {
+    padding-top: 300px;
+}
+
+.slide-text .slide-title {
+    font-size: 88px;
+    font-weight: 900;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    margin-bottom: 32px;
+    color: var(--color-text-primary);
+    text-transform: uppercase;
+}
+
+.slide-text-content {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 auto;
+    text-align: center;
+    max-width: 700px;
+}
+
+.slide-text-content .contact-links {
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.slide-text-content .contact-links a {
+    color: var(--color-text-secondary);
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+}
+
+.slide-text-content .contact-links a:hover {
+    opacity: 0.7;
+}
+
+/* Mockup Slide */
+.slide-mockup {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+/* Controls */
+.horizontal-slider-controls {
+    position: fixed;
+    bottom: 24px; /* Closer to the bottom edge */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    /* Transparent container to match UI layer style */
+    padding: 0;
+    background: transparent;
+    backdrop-filter: none;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    z-index: 1000;
+    
+    /* Allow layout always, but click-through when hidden */
+    pointer-events: none;
+}
+
+/* Children visibility managed separately */
+
+.slider-nav {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Match theme toggle style */
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    color: var(--color-text-primary);
+    font-size: 24px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: none;
+    
+    /* Default visible at 25% like indicators */
+    opacity: 0.25;
+    pointer-events: auto; /* Allow interaction */
+}
+
+/* Show buttons fully when nav is visible */
+body.nav-visible .slider-nav {
+    opacity: 1;
+}
+
+.slider-nav:hover:not(:disabled) {
+    background: transparent;
+    transform: scale(1.05);
+    color: var(--color-text-primary);
+    box-shadow: none;
+    /* Increase opacity on hover even if UI is hidden */
+    opacity: 1 !important; 
+}
+
+.slider-nav:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    box-shadow: none;
+}
+
+.slider-indicators {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    /* Add a subtle background for indicators since they might be hard to see on complex images */
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: none;
+    
+    /* Default visible at 25% */
+    opacity: 0.25;
+    pointer-events: auto; /* Allow interaction if user targets it specifically */
+    transition: opacity 0.3s ease;
+}
+
+/* Full opacity when nav is visible */
+body.nav-visible .slider-indicators {
+    opacity: 1;
+}
+
+.slider-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--color-text-primary); /* Solid fill */
+    border: none; /* No ring/border */
+    border-radius: 50%;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.5; /* Dimmer for inactive */
+    box-sizing: border-box;
+}
+
+.slider-indicator:hover {
+    transform: scale(1.2);
+    opacity: 0.8;
+}
+
+.slider-indicator.active {
+    width: 24px; /* Pill shape - wider */
+    height: 8px;
+    border-radius: 4px; /* Pill corners */
+    background: var(--color-text-primary);
+    opacity: 1; /* Full opacity for active */
+    transform: scale(1);
+}
+
+/* Swipe Hint - Hidden */
+.horizontal-slider-hint {
+    display: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .horizontal-slider-controls {
+        bottom: 74px;
+        gap: 16px;
+    }
+
+    .slide-title,
+    .slide-text .slide-title {
+        font-size: 40px;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        word-wrap: break-word; /* Ensure long words break */
+    }
+
+    .slide-text {
+        padding: 24px;
+        width: 100%;
+    }
+    
+    .slide-text.has-title-image {
+        padding-top: 150px;
+    }
+
+    .slide-overview {
+        padding: 24px;
+        padding-top: 150px;
+    }
+
+    .slide-overview .slide-description,
+    .slide-text-content {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    
+    .slide-title-image {
+        margin-top: 20px;
+        max-width: 300px;
+    }
+    
+    /* On mobile, maybe keep them visible or let them fade? 
+       For now, following desktop logic as requested. */
+}
+
+/* Dark Mode - styling handled by CSS variables, removing manual overrides */
+[data-theme="dark"] .horizontal-slider-controls,
+[data-theme="dark"] .horizontal-slider-hint {
+    background: transparent;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .horizontal-slider-track {
+        transition: none;
+    }
+
+    .slide-hint i,
+    .horizontal-slider-hint i {
+        animation: none;
+    }
+
+    @keyframes slideContentFadeIn {
+        from, to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
+

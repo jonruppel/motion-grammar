@@ -1,7 +1,8 @@
 // Content Manager - Handles dynamic content loading
 
 import { HomePage } from '../pages/HomePage.js';
-import { Icon, Button, Text } from '../components/index.js';
+import { Icon, Button, Text, HorizontalSlider } from '../components/index.js';
+import { contentRegistry } from '../utils/content-registry.js';
 
 export class ContentManager {
     constructor(headerElement, bodyElement, heroContainer) {
@@ -28,8 +29,12 @@ export class ContentManager {
         this.needsPageSpacer = false;
         
         // Cleanup current module
-        if (this.currentModule && typeof this.currentModule.dispose === 'function') {
-            this.currentModule.dispose();
+        if (this.currentModule) {
+            if (typeof this.currentModule.dispose === 'function') {
+                this.currentModule.dispose();
+            } else if (typeof this.currentModule.destroy === 'function') {
+                this.currentModule.destroy();
+            }
         }
         this.currentModule = null;
         
@@ -41,11 +46,27 @@ export class ContentManager {
     }
 
     /**
-     * Load an experience module
+     * Load content based on type
+     */
+    async loadContent(itemId, modulePathOrType, contentType = null) {
+        // Determine content type
+        const content = contentRegistry.get(itemId);
+        const type = content?.type || contentType;
+
+        // Route to appropriate loader
+        if (type === 'case-study' || type === 'slide-deck') {
+            return this.loadSlideContent(itemId, content);
+        } else {
+            // Default: load as visualization module
+            return this.loadExperience(itemId, modulePathOrType);
+        }
+    }
+
+    /**
+     * Load an experience module (visualization)
      */
     async loadExperience(itemId, modulePath) {
         if (this.isTransitioning) {
-            console.warn('Already transitioning, skipping load');
             return;
         }
         
@@ -58,8 +79,22 @@ export class ContentManager {
             if (module.header) {
                 const titleEl = this.headerElement.querySelector('.page-title');
                 const descEl = this.headerElement.querySelector('.page-description');
-                if (titleEl) titleEl.textContent = module.header.title;
+                if (titleEl) titleEl.innerHTML = module.header.title; // Use innerHTML to support <br>
                 if (descEl) descEl.textContent = module.header.description || '';
+                
+                // Ensure header is visible for experiences
+                if (this.headerElement) {
+                    this.headerElement.style.display = 'block';
+                    // Reset background to transparent to sit over visualization
+                    this.headerElement.style.backgroundColor = 'transparent'; 
+                    this.headerElement.style.borderBottom = 'none';
+                    // Ensure it's centered and positioned correctly
+                    this.headerElement.style.position = 'absolute';
+                    this.headerElement.style.width = '100%';
+                    this.headerElement.style.top = '0';
+                    this.headerElement.style.zIndex = '10';
+                    this.headerElement.style.pointerEvents = 'none'; // Click through to visualization
+                }
             }
             
             // Cleanup current content
@@ -88,12 +123,62 @@ export class ContentManager {
             }
 
         } catch (error) {
-            console.error('Error loading experience:', error);
             this.showError(itemId, modulePath);
         } finally {
             this.isTransitioning = false;
         }
     }
+
+    /**
+     * Load slide-based content (case studies, about, etc.)
+     */
+    async loadSlideContent(itemId, content) {
+        if (this.isTransitioning) {
+            return;
+        }
+
+        this.isTransitioning = true;
+
+        try {
+            // Fetch content data
+            const response = await fetch(content.dataPath);
+            if (!response.ok) throw new Error(`Failed to load ${content.dataPath}`);
+            const data = await response.json();
+
+            // Cleanup current content
+            this.cleanupCurrentContent();
+
+            // Clear containers
+            this.bodyElement.innerHTML = '';
+            if (this.heroContainer) this.heroContainer.innerHTML = '';
+
+            // Hide header for slide-based content
+            if (this.headerElement) {
+                this.headerElement.style.display = 'none';
+            }
+
+            // Create horizontal slider
+            const slider = new HorizontalSlider({
+                slides: data.slides || [],
+                onSlideChange: (index, slide) => {
+                    // Slide change handler
+                }
+            });
+
+            const sliderElement = slider.render();
+            this.heroContainer.appendChild(sliderElement);
+            slider.element = sliderElement; // Store reference for later
+
+            this.currentModule = slider;
+
+        } catch (error) {
+            console.error('Error loading slide content:', error);
+            this.showError(itemId, content?.dataPath || 'unknown');
+        } finally {
+            this.isTransitioning = false;
+        }
+    }
+
 
     /**
      * Show welcome/home page
@@ -117,7 +202,8 @@ export class ContentManager {
             if (this.heroContainer && heroElement) {
                 this.heroContainer.appendChild(heroElement);
             }
-            this.body极速赛车开奖官网开奖结果>            
+            this.bodyElement.appendChild(contentElement);
+            
             await this.homePage.setupAnimations();
             
         } catch (error) {

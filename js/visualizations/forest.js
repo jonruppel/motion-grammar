@@ -76,6 +76,10 @@ export class Forest {
         this.windOffset = Math.random() * Math.PI * 2; // Random wind phase
         this.timeSinceLastSpawn = 0; // Track time since last tree spawn
         
+        // Audio reactivity
+        this.smoothedEnergy = 0;
+        this.currentAudioData = null;
+        
         this.init();
     }
     
@@ -497,6 +501,35 @@ export class Forest {
         this.animationId = requestAnimationFrame(() => this.animate());
         this.time += 0.016; // ~60fps
         
+        // Audio reactivity
+        let audioEnergy = 0;
+        let audioData = null;
+        if (window.audioAnalyser) {
+            const bufferLength = window.audioAnalyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            window.audioAnalyser.getByteFrequencyData(dataArray);
+            
+            let sum = 0;
+            for(let i=0; i<bufferLength; i++) sum += dataArray[i];
+            const avg = sum / bufferLength;
+            
+            const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+            
+            if (avg > 10) {
+                // Smooth energy
+                const targetEnergy = (avg / 255) * volume;
+                this.smoothedEnergy += (targetEnergy - this.smoothedEnergy) * 0.2;
+                audioEnergy = this.smoothedEnergy;
+                audioData = dataArray;
+            } else {
+                this.smoothedEnergy *= 0.95;
+                audioEnergy = this.smoothedEnergy;
+            }
+        }
+        
+        this.currentAudioData = audioData;
+        this.currentAudioEnergy = audioEnergy;
+        
         // Move trees forward
         this.updateForest();
         
@@ -626,6 +659,7 @@ export class Forest {
             if (child.userData && child.userData.type === 'branch') {
                 const depth = child.userData.depth;
                 const windPhase = child.userData.windPhase;
+                const baseAngle = child.userData.baseAngle; // Use base angle for spread direction
                 
                 // Higher branches sway more (depth-based multiplier)
                 const depthMultiplier = Math.pow(depth / this.settings.tree.maxDepth, 1.5);
@@ -641,15 +675,62 @@ export class Forest {
                     this.settings.wind.gustVariation * 
                     depthMultiplier;
                 
-                const totalSway = swayAngle + gustAngle;
+                // Audio Spread: Branches spread apart on beat
+                // PI/2 is Up. < PI/2 is Right (lean right), > PI/2 is Left (lean left)
+                // Right branches rotate clockwise (-), Left rotate counter-clockwise (+) to spread OUT
+                const isLeaningRight = baseAngle < Math.PI / 2;
+                const spreadDir = isLeaningRight ? -1 : 1;
+                
+                // Audio spread intensity - Exaggerated but toned down
+                const audioSpread = this.currentAudioEnergy * 1.25 * spreadDir * depthMultiplier;
+                
+                const totalSway = swayAngle + gustAngle + audioSpread;
                 
                 // Apply rotation to this branch group around Z axis
-                // This rotation affects both the branch geometry AND all children
                 child.rotation.z = totalSway;
                 child.userData.currentWindRotation = totalSway;
                 
                 // Recursively apply wind to children (they inherit parent rotation)
                 this.applyWindToGroup(child, windTime);
+            }
+            
+            // Audio Color Reaction for Leaves
+            if (child.userData && child.userData.type === 'leaves') {
+                const leafGroup = child;
+                
+                // Determine frequency bin based on depth or random ID
+                // Map depth (0-6) to frequency range
+                if (this.currentAudioData) {
+                    const depth = leafGroup.userData.depth;
+                    const binCount = this.currentAudioData.length;
+                    
+                    // Map leaves at different depths to different frequency bins - LOWER BINS for better visibility
+                    // Use modulo to cycle through valid bins (focused on lower 30% of spectrum)
+                    const binIndex = Math.floor((depth * 5) % (binCount * 0.4)); 
+                    
+                    const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+                    const freq = (this.currentAudioData[binIndex] / 255) * volume;
+                    
+                    // Iterate through all leaf meshes in this group
+                    leafGroup.children.forEach(leafMesh => {
+                        if (leafMesh.material) {
+                            // More sensitive threshold for color change
+                            if (freq > 0.15) {
+                                // Flash color - Red shift to match app style
+                                const baseColor = this.parseCSSColor(this.settings.tree.leafColor);
+                                const flashColor = new THREE.Color(1, 0, 0); // Vibrant Red
+                                
+                                // Mix based on frequency intensity - very sharp/responsive
+                                const mix = Math.min((freq - 0.15) * 4.0, 1);
+                                leafMesh.material.color.lerpColors(baseColor, flashColor, mix);
+                            } else {
+                                // Return to base color
+                                const baseColor = this.parseCSSColor(this.settings.tree.leafColor);
+                                leafMesh.material.color.lerp(baseColor, 0.1);
+                            }
+                        }
+                    });
+                }
             }
         });
     }

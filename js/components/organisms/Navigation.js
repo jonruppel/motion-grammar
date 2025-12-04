@@ -28,23 +28,80 @@ export class Navigation extends Component {
         });
 
         navigationData.forEach(group => {
-            const navGroup = new NavGroup({
-                id: group.id,
-                title: group.title,
-                icon: group.icon,
-                items: group.children || [],
-                expanded: true,
-                onItemClick: (data) => {
-                    this.setActive(data.id);
-                    if (onNavigate) {
-                        onNavigate(data.id, data.module);
+            // Check if this is a group with children or a standalone item
+            if (group.children && group.children.length > 0) {
+                // Render as NavGroup with children
+                const navGroup = new NavGroup({
+                    id: group.id,
+                    title: group.title,
+                    icon: group.icon,
+                    items: group.children,
+                    expanded: true,
+                    onItemClick: (data) => {
+                        this.setActive(data.id);
+                        if (onNavigate) {
+                            // Pass the module/dataPath from the item
+                            onNavigate(data.id, data.module || data.dataPath);
+                        }
                     }
-                }
-            });
+                });
 
-            this.navGroups.push(navGroup);
-            this.children.push(navGroup);
-            container.appendChild(navGroup.render());
+                this.navGroups.push(navGroup);
+                this.children.push(navGroup);
+                container.appendChild(navGroup.render());
+            } else {
+                // Render as standalone clickable item
+                const standaloneItem = this.createElement('div', {
+                    className: 'nav-group nav-standalone',
+                    dataset: { groupId: group.id }
+                });
+
+                const itemLink = this.createElement('div', {
+                    className: 'nav-group-title nav-clickable',
+                    dataset: { 
+                        itemId: group.id,
+                        module: group.dataPath || group.type
+                    }
+                });
+
+                // Icon
+                const iconComponent = this.createElement('i', {
+                    className: `bx ${group.icon}`
+                });
+                itemLink.appendChild(iconComponent);
+
+                // Title
+                const titleSpan = this.createElement('span', {
+                    text: group.title
+                });
+                itemLink.appendChild(titleSpan);
+
+                standaloneItem.appendChild(itemLink);
+                container.appendChild(standaloneItem);
+
+                // Click handler
+                this.addEventListener(itemLink, 'click', () => {
+                    this.setActive(group.id);
+                    if (onNavigate) {
+                        onNavigate(group.id, group.dataPath || group.type);
+                    }
+                });
+
+                // Track for active state management
+                this.navGroups.push({
+                    element: standaloneItem,
+                    isStandalone: true,
+                    id: group.id,
+                    setActiveItem: (itemId) => {
+                        const shouldBeActive = group.id === itemId;
+                        if (shouldBeActive) {
+                            itemLink.classList.add('active');
+                        } else {
+                            itemLink.classList.remove('active');
+                        }
+                    }
+                });
+            }
         });
 
         // Animate nav groups in with stagger

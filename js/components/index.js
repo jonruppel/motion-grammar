@@ -26,5 +26,6 @@ export { List } from './molecules/List.js';
 export { Navigation } from './organisms/Navigation.js';
 export { Sidebar } from './organisms/Sidebar.js';
 export { Hero } from './organisms/Hero.js';
-export { Modal } from './organisms/Modal.js';
+export { HorizontalSlider } from './organisms/HorizontalSlider.js';
+export { Tutorial } from './organisms/Tutorial.js';
 

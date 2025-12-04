@@ -35,6 +35,20 @@ const VISUALIZATION_MANIFEST = [
         description: 'Rolling blocks with physics and collision detection',
         module: () => import('../visualizations/block-roller.js'),
         className: 'BlockRoller'
+    },
+    {
+        id: 'viz-cell-game',
+        title: 'Cell Game',
+        description: 'Interactive cell with physics-based membrane and draggable nucleus',
+        module: () => import('../visualizations/cell-game.js'),
+        className: 'Cell'
+    },
+    {
+        id: 'viz-through-the-wire',
+        title: 'Through the Wire',
+        description: 'Side-scrolling telephone poles with slumping wires and occasional birds',
+        module: () => import('../visualizations/through-the-wire.js'),
+        className: 'ThroughTheWire'
     }
     // Add more visualizations here as needed!
 ];
@@ -50,7 +64,6 @@ class VisualizationRegistry {
      * Initialize the registry with all visualizations from the manifest
      */
     async initialize() {
-        console.log('🎨 Visualization Registry: Initializing...');
         
         // Register all visualizations from manifest
         VISUALIZATION_MANIFEST.forEach(viz => {
@@ -64,7 +77,6 @@ class VisualizationRegistry {
             });
         });
         
-        console.log(`✅ Visualization Registry: Registered ${this.visualizations.size} visualizations`);
     }
 
     /**
@@ -109,7 +121,6 @@ class VisualizationRegistry {
             config.visualizationClass = module[config.className];
             return config.visualizationClass;
         } catch (error) {
-            console.error(`Failed to load visualization "${id}":`, error);
             throw error;
         }
     }

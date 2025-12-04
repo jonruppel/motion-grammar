@@ -3,15 +3,37 @@
 
 import { Sidebar } from '../components/index.js';
 import { visualizationRegistry } from '../utils/visualization-registry.js';
+import { contentRegistry } from '../utils/content-registry.js';
 
-// Get navigation data with dynamic visualizations
+// Get navigation data with dynamic visualizations and content
 function getNavigationData() {
+    const caseStudies = contentRegistry.getByCategory('case-studies');
+    const aboutContent = contentRegistry.getByCategory('about');
+    
     return [
         {
             id: 'visualizations',
-            title: 'Visualizations',
+            title: 'Vibes',
             icon: 'bx-paint',
             children: visualizationRegistry.getNavigationData()
+        },
+        {
+            id: 'case-studies',
+            title: 'Work Samples',
+            icon: 'bx-briefcase',
+            children: caseStudies.map(study => ({
+                id: study.id,
+                title: study.title,
+                type: study.type,
+                dataPath: study.dataPath
+            }))
+        },
+        {
+            id: 'about',
+            title: 'About',
+            icon: 'bx-user',
+            type: 'slide-deck',
+            dataPath: aboutContent[0]?.dataPath || '/data/about.json'
         }
     ];
 }
@@ -69,7 +91,7 @@ export class Navigation {
         this.currentItem = itemId;
         if (this.sidebarComponent) {
             const nav = this.sidebarComponent.getNavigation();
-            if (nav) {
+            if (nav && typeof nav.setActive === 'function') {
                 nav.setActive(itemId);
             }
         }
@@ -78,7 +100,7 @@ export class Navigation {
     setActiveFromUrl() {
         if (this.sidebarComponent) {
             const nav = this.sidebarComponent.getNavigation();
-            if (nav) {
+            if (nav && typeof nav.setActiveFromUrl === 'function') {
                 return nav.setActiveFromUrl();
             }
         }
