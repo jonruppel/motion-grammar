@@ -48,14 +48,14 @@ export class ContentManager {
     /**
      * Load content based on type
      */
-    async loadContent(itemId, modulePathOrType, contentType = null) {
+    async loadContent(itemId, modulePathOrType, contentType = null, initialIndex = 0) {
         // Determine content type
         const content = contentRegistry.get(itemId);
         const type = content?.type || contentType;
 
         // Route to appropriate loader
         if (type === 'case-study' || type === 'slide-deck') {
-            return this.loadSlideContent(itemId, content);
+            return this.loadSlideContent(itemId, content, initialIndex);
         } else {
             // Default: load as visualization module
             return this.loadExperience(itemId, modulePathOrType);
@@ -132,7 +132,7 @@ export class ContentManager {
     /**
      * Load slide-based content (case studies, about, etc.)
      */
-    async loadSlideContent(itemId, content) {
+    async loadSlideContent(itemId, content, initialIndex = 0) {
         if (this.isTransitioning) {
             return;
         }
@@ -160,8 +160,16 @@ export class ContentManager {
             // Create horizontal slider
             const slider = new HorizontalSlider({
                 slides: data.slides || [],
+                initialIndex: initialIndex,
                 onSlideChange: (index, slide) => {
-                    // Slide change handler
+                    // Update URL with slide index
+                    const url = new URL(window.location);
+                    if (index > 0) {
+                        url.searchParams.set('slide', index);
+                    } else {
+                        url.searchParams.delete('slide');
+                    }
+                    window.history.replaceState({}, '', url);
                 }
             });
 

@@ -12,6 +12,13 @@ function getNavigationData() {
     
     return [
         {
+            id: 'about',
+            title: 'About',
+            icon: 'bx-user',
+            type: 'slide-deck',
+            dataPath: aboutContent[0]?.dataPath || '/data/about.json'
+        },
+        {
             id: 'visualizations',
             title: 'Vibes',
             icon: 'bx-paint',
@@ -27,13 +34,6 @@ function getNavigationData() {
                 type: study.type,
                 dataPath: study.dataPath
             }))
-        },
-        {
-            id: 'about',
-            title: 'About',
-            icon: 'bx-user',
-            type: 'slide-deck',
-            dataPath: aboutContent[0]?.dataPath || '/data/about.json'
         }
     ];
 }

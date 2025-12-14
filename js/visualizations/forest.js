@@ -501,10 +501,12 @@ export class Forest {
         this.animationId = requestAnimationFrame(() => this.animate());
         this.time += 0.016; // ~60fps
         
-        // Audio reactivity
+        // Audio reactivity - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
-        if (window.audioAnalyser) {
+        const isMusicPlaying = window.musicIsPlaying || false;
+        
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -522,13 +524,20 @@ export class Forest {
                 audioEnergy = this.smoothedEnergy;
                 audioData = dataArray;
             } else {
-                this.smoothedEnergy *= 0.95;
-                audioEnergy = this.smoothedEnergy;
+                // Immediately reset when no audio
+                this.smoothedEnergy = 0;
+                audioEnergy = 0;
             }
+        } else {
+            // No audio analyser or music not playing - reset everything immediately
+            this.smoothedEnergy = 0;
+            audioEnergy = 0;
+            audioData = null;
         }
         
-        this.currentAudioData = audioData;
-        this.currentAudioEnergy = audioEnergy;
+        // Reset to null if music not playing
+        this.currentAudioData = isMusicPlaying ? audioData : null;
+        this.currentAudioEnergy = isMusicPlaying ? audioEnergy : 0;
         
         // Move trees forward
         this.updateForest();
@@ -726,8 +735,16 @@ export class Forest {
                             } else {
                                 // Return to base color
                                 const baseColor = this.parseCSSColor(this.settings.tree.leafColor);
-                                leafMesh.material.color.lerp(baseColor, 0.1);
+                                leafMesh.material.color.copy(baseColor);
                             }
+                        }
+                    });
+                } else {
+                    // No audio data - reset all leaf colors to base immediately
+                    leafGroup.children.forEach(leafMesh => {
+                        if (leafMesh.material) {
+                            const baseColor = this.parseCSSColor(this.settings.tree.leafColor);
+                            leafMesh.material.color.copy(baseColor);
                         }
                     });
                 }

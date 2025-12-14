@@ -1136,10 +1136,12 @@ export class ThroughTheWire {
         const deltaTime = 0.016; // approx 60fps
         this.time += deltaTime;
         
-        // Audio reactivity
+        // Audio reactivity - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
-        if (window.audioAnalyser) {
+        const isMusicPlaying = window.musicIsPlaying || false;
+        
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -1155,8 +1157,9 @@ export class ThroughTheWire {
             }
         }
         
-        this.currentAudioEnergy = audioEnergy;
-        this.currentAudioData = audioData;
+        // Reset to null if music not playing
+        this.currentAudioEnergy = isMusicPlaying ? audioEnergy : 0;
+        this.currentAudioData = isMusicPlaying ? audioData : null;
         
         this.updateScene(deltaTime);
         
@@ -1192,7 +1195,26 @@ export class ThroughTheWire {
         const updateWireWave = (wire) => {
              // Use this.currentAudioData directly
              const currentAudioData = this.currentAudioData;
-             if (!wire.mesh || !wire.curve || !currentAudioData) return;
+             if (!wire.mesh || !wire.curve) return;
+             
+             // Lazy init original positions
+             if (!wire.mesh.geometry.userData.originalPositions) {
+                 wire.mesh.geometry.userData.originalPositions = wire.mesh.geometry.attributes.position.array.slice();
+             }
+             
+             const positions = wire.mesh.geometry.attributes.position;
+             const originalPositions = wire.mesh.geometry.userData.originalPositions;
+             
+             // If no audio data, reset wire to original positions
+             if (!currentAudioData) {
+                 // Reset to flat wire immediately
+                 for (let i = 0; i < originalPositions.length; i++) {
+                     positions.array[i] = originalPositions[i];
+                 }
+                 positions.needsUpdate = true;
+                 wire.currentWaveFreq = 0;
+                 return;
+             }
              
              // Get frequency for this wire
              const isBass = this.secondWires.includes(wire);
@@ -1206,14 +1228,6 @@ export class ThroughTheWire {
              // Store current wave params on the wire for birds to use
              wire.currentWaveFreq = freq;
              wire.currentWaveTime = this.time;
-
-             // Lazy init original positions
-             if (!wire.mesh.geometry.userData.originalPositions) {
-                 wire.mesh.geometry.userData.originalPositions = wire.mesh.geometry.attributes.position.array.slice();
-             }
-             
-             const positions = wire.mesh.geometry.attributes.position;
-             const originalPositions = wire.mesh.geometry.userData.originalPositions;
              
              const tubularSegments = 80;
              const radialSegments = 16;
@@ -1427,6 +1441,10 @@ export class ThroughTheWire {
             // Direct application - no smoothing for instant reaction
             this.moon.mesh.scale.set(targetScale, targetScale, 1);
             this.moon.border.scale.set(targetScale, targetScale, 1);
+        } else {
+            // No audio - reset moon scale to base immediately
+            this.moon.mesh.scale.set(1.0, 1.0, 1);
+            this.moon.border.scale.set(1.0, 1.0, 1);
         }
         
         // Cull first layer leftmost poles that moved past cullX (left side)

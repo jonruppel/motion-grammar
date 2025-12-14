@@ -10,6 +10,22 @@
     height: 100%;
 }
 
+/* TV Title */
+.tv-title {
+    width: 1000px;
+    text-align: left;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Ensure it doesn't collapse if empty */
+    min-height: 1.5em; 
+}
+
 /* TV Frame */
 .tv-frame {
     position: relative;
@@ -34,6 +50,10 @@ body:not(.nav-visible) .tv-frame {
     width: 1400px;
 }
 
+body:not(.nav-visible) .tv-title {
+    width: 1400px;
+}
+
 /* TV Screen - single masked 16:9 surface */
 .tv-screen {
     position: relative;
@@ -45,7 +65,7 @@ body:not(.nav-visible) .tv-frame {
     overflow: hidden;
     border-radius: 4px; /* Small radius for a modern flat panel look */
     /* Inner rim and dimensionality just inside the bezel */
-    box-shadow:
+    box-shadow: 
         0 0 0 1px rgba(0, 0, 0, 0.95),          /* hard glass edge against bezel */
         inset 0 1px 2px rgba(255, 255, 255, 0.14), /* subtle top highlight */
         inset 0 -2px 4px rgba(0, 0, 0, 0.9),       /* darker bottom edge */
@@ -97,8 +117,14 @@ body:not(.nav-visible) .tv-frame {
         width: 800px;
         padding: 16px;
     }
+    .tv-title {
+        width: 800px;
+    }
     
     body:not(.nav-visible) .tv-frame {
+        width: 1100px;
+    }
+    body:not(.nav-visible) .tv-title {
         width: 1100px;
     }
 }
@@ -109,8 +135,14 @@ body:not(.nav-visible) .tv-frame {
         border-radius: 6px;
         padding: 14px;
     }
+    .tv-title {
+        width: 640px;
+    }
     
     body:not(.nav-visible) .tv-frame {
+        width: 85vw;
+    }
+    body:not(.nav-visible) .tv-title {
         width: 85vw;
     }
 }
@@ -123,8 +155,18 @@ body:not(.nav-visible) .tv-frame {
         border-radius: 4px;
         padding: 12px;
     }
+    .tv-title {
+        width: 100%;
+        max-width: 500px;
+        /* Add some padding on mobile so it doesn't hit edge */
+        padding-left: 2px;
+    }
     
     body:not(.nav-visible) .tv-frame {
+        width: 90vw;
+        max-width: 700px;
+    }
+    body:not(.nav-visible) .tv-title {
         width: 90vw;
         max-width: 700px;
     }
@@ -137,6 +179,10 @@ body:not(.nav-visible) .tv-frame {
 
 [data-theme="light"] .tv-content::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .tv-title {
+    color: #111;
 }
 
 /* Loading state */
@@ -152,4 +198,3 @@ body:not(.nav-visible) .tv-frame {
     color: var(--color-text-secondary);
     font-size: 14px;
 }
-

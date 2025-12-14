@@ -420,10 +420,12 @@ export class BlobIK {
         if (this.isPaused) return;
         this.animationId = requestAnimationFrame(() => this.animate());
         
-        // Audio reactivity
+        // Audio reactivity - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
-        if (window.audioAnalyser) {
+        const isMusicPlaying = window.musicIsPlaying || false;
+        
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -440,7 +442,12 @@ export class BlobIK {
             }
         }
         
-        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        // Immediately reset to 0 if no audio data or music not playing, otherwise smooth it
+        if (!audioData || !isMusicPlaying) {
+            this.smoothedEnergy = 0;
+        } else {
+            this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        }
         
         // Rotation speed (constant, removed audio modulation)
         const currentRotationSpeed = this.settings.physics.rotationSpeed;

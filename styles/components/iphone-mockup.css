@@ -12,8 +12,8 @@
 /* iPhone Frame */
 .iphone-frame {
     position: relative;
-    width: 375px;
-    height: 812px;
+    width: 338px;
+    height: 731px;
     /* Slightly multi-tonal shell for more realistic texture */
     background:
         radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.08) 0, transparent 40%),
@@ -151,8 +151,8 @@
 /* Responsive: Smaller iPhone on smaller screens */
 @media (max-width: 900px) {
     .iphone-frame {
-        width: 300px;
-        height: 650px;
+        width: 270px;
+        height: 585px;
         border-radius: 40px;
         padding: 10px;
     }
@@ -162,9 +162,9 @@
     }
 
     .iphone-notch {
-        width: 170px;
-        height: 24px;
-        border-radius: 0 0 24px 24px;
+        width: 153px;
+        height: 22px;
+        border-radius: 0 0 22px 22px;
     }
 
     .iphone-status-bar {
@@ -182,8 +182,8 @@
 /* Responsive: Tablet/Mobile view */
 @media (max-width: 768px) {
     .iphone-frame {
-        width: 280px;
-        height: 600px;
+        width: 252px;
+        height: 540px;
         border-radius: 35px;
         padding: 8px;
     }
@@ -193,8 +193,8 @@
     }
 
     .iphone-notch {
-        width: 150px;
-        height: 22px;
+        width: 135px;
+        height: 20px;
         border-radius: 0 0 20px 20px;
     }
 

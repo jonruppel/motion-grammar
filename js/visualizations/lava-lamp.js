@@ -346,11 +346,12 @@ export class LavaLamp {
             this.animationId = requestAnimationFrame(() => this.animate());
         }
         
-        // Check for audio data
+        // Check for audio data - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
+        const isMusicPlaying = window.musicIsPlaying || false;
         
-        if (window.audioAnalyser) {
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -374,7 +375,12 @@ export class LavaLamp {
         
         // Smooth the energy value to prevent chaos
         // Lower factor = smoother/slower reaction, Higher = punchier
-        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        // Immediately reset to 0 if no audio data or music not playing
+        if (!audioData || !isMusicPlaying) {
+            this.smoothedEnergy = 0;
+        } else {
+            this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        }
         
         // 1. Control Scene Rhythm (Global Time)
         // Base speed + boost from smoothed energy
@@ -417,39 +423,44 @@ export class LavaLamp {
             let speedX = 0.002;
             let speedY = 0.002;
             let speedZ = 0.0008;
-            let pulseIntensity = 0.15;
+            let pulseIntensity = userData.pulseIntensity || 0.15; // Use stored value or default
             let baseScale = userData.baseSize;
             
-            // 3. Detailed Audio Reactivity
-            if (this.smoothedEnergy > 0.01) {
+            // Audio Reactivity - Check if we have valid audio data
+            if (audioData && this.smoothedEnergy > 0.01) {
                 // Pulse based on specific frequency bin for this blob
-                // Map blob index to frequency bin
-                if (audioData) {
-                    const binIndex = Math.floor((index / this.blobs.length) * (audioData.length / 2));
-                    const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
-                    const freqValue = (audioData[binIndex] / 255) * volume;
-                    
-                    // Increase pulse intensity with specific frequency (beat)
-                    // We combine smoothed energy (vibe) with immediate freq (beat)
-                    // Boosted sensitivity: 1.0 multiplier instead of 0.6
-                    pulseIntensity = 0.15 + (freqValue * 1.0) + (this.smoothedEnergy * 0.4);
-                    
-                    // Color Pulse (Blue -> Red) - Sharp transition
-                    const redColor = new THREE.Color(1, 0, 0);
-                    const threshold = 0.4;
-                    // Boost input by 1.5x for earlier color change
-                    const mix = Math.max(0, Math.min(1, (freqValue * 1.5 - threshold) * 3));
-                    
-                    blob.material.color.lerpColors(userData.baseColor, redColor, mix);
-                    blob.material.emissive.lerpColors(userData.baseColor, redColor, mix);
+                const binIndex = Math.floor((index / this.blobs.length) * (audioData.length / 2));
+                const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+                const freqValue = (audioData[binIndex] / 255) * volume;
+                
+                // Increase pulse intensity with specific frequency (beat)
+                // We combine smoothed energy (vibe) with immediate freq (beat)
+                // Boosted sensitivity: 1.0 multiplier instead of 0.6
+                pulseIntensity = 0.15 + (freqValue * 1.0) + (this.smoothedEnergy * 0.4);
+                
+                // Store the pulse intensity for when audio stops
+                userData.pulseIntensity = pulseIntensity;
+                
+                // Color Pulse (Blue -> Red) - Sharp transition
+                const redColor = new THREE.Color(1, 0, 0);
+                const threshold = 0.4;
+                // Boost input by 1.5x for earlier color change
+                const mix = Math.max(0, Math.min(1, (freqValue * 1.5 - threshold) * 3));
+                
+                blob.material.color.lerpColors(userData.baseColor, redColor, mix);
+                blob.material.emissive.lerpColors(userData.baseColor, redColor, mix);
 
-                    // Add slight positional jitter on strong beats only (Lower threshold 0.4)
-                    if (freqValue > 0.4) {
-                        const jitter = freqValue * 0.05; // Slightly stronger jitter
-                        blob.position.x += (Math.random() - 0.5) * jitter;
-                        blob.position.y += (Math.random() - 0.5) * jitter;
-                    }
+                // Add slight positional jitter on strong beats only (Lower threshold 0.4)
+                if (freqValue > 0.4) {
+                    const jitter = freqValue * 0.05; // Slightly stronger jitter
+                    blob.position.x += (Math.random() - 0.5) * jitter;
+                    blob.position.y += (Math.random() - 0.5) * jitter;
                 }
+            } else {
+                // No audio or low energy - ONLY reset colors to base, keep scale/movement
+                blob.material.color.copy(userData.baseColor);
+                blob.material.emissive.copy(userData.baseColor);
+                // pulseIntensity keeps its last value from userData.pulseIntensity
             }
             
             // Slow, organic floating motion

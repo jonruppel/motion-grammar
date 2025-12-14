@@ -821,8 +821,8 @@
 
 .nav-standalone .nav-group-title {
     border-radius: 8px;
-    margin: 4px 8px;
-    padding: 12px 16px;
+    margin: var(--spacing-xs) 0; /* Remove horizontal margin to align with group titles */
+    padding: var(--spacing-sm) calc(var(--spacing-lg) + var(--spacing-xs)); /* Match group title padding exactly */
 }
 
 .nav-standalone .nav-group-title:hover {

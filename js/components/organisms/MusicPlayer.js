@@ -96,6 +96,7 @@ export class MusicPlayer extends Component {
         // Expose analyser globally for visualizations
         window.audioAnalyser = this.analyser;
         window.musicVolume = this.volume;
+        window.musicIsPlaying = false;
         
         return Promise.resolve();
     }
@@ -113,6 +114,7 @@ export class MusicPlayer extends Component {
             await this.audioElement.play();
             this.currentTrackIndex = index;
             this.isPlaying = true;
+            window.musicIsPlaying = true;
             this.updateUIState();
             this.startVisualizer();
             this.updateTrackInfo();
@@ -144,7 +146,8 @@ export class MusicPlayer extends Component {
             await this.initAudioContext();
         }
         
-        if (this.audioContext.state === 'suspended') {
+        // Resume audio context if suspended
+        if (this.audioContext && this.audioContext.state === 'suspended') {
             await this.audioContext.resume();
         }
         
@@ -154,8 +157,12 @@ export class MusicPlayer extends Component {
         } else {
             // Resume existing track
             try {
-                await this.audioElement.play();
+                // Only play if paused
+                if (this.audioElement.paused) {
+                    await this.audioElement.play();
+                }
                 this.isPlaying = true;
+                window.musicIsPlaying = true;
                 this.updateUIState();
                 this.startVisualizer();
             } catch (error) {
@@ -167,11 +174,18 @@ export class MusicPlayer extends Component {
     pause() {
         if (!this.isPlaying) return;
         
+        // Pause the audio element first
         if (this.audioElement) {
             this.audioElement.pause();
         }
         
+        // Suspend the audio context to stop processing
+        if (this.audioContext && this.audioContext.state === 'running') {
+            this.audioContext.suspend();
+        }
+        
         this.isPlaying = false;
+        window.musicIsPlaying = false;
         this.updateUIState();
         this.stopVisualizer();
     }
@@ -248,15 +262,18 @@ export class MusicPlayer extends Component {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
             this.animationId = null;
-            // Clear canvas
+            // Clear both canvases
             if (this.canvasCtx) {
                 this.canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            if (this.canvasModalCtx) {
+                this.canvasModalCtx.clearRect(0, 0, this.canvasModal.width, this.canvasModal.height);
             }
         }
     }
 
     draw() {
-        if (!this.analyser || !this.canvasCtx) return;
+        if (!this.analyser || !this.canvasCtx || !this.isPlaying) return;
 
         this.animationId = requestAnimationFrame(this.draw);
 
@@ -361,11 +378,17 @@ export class MusicPlayer extends Component {
         
         if (this.isPlaying) {
             container.classList.add('playing');
-            icon.className = 'toggle-icon bx bx-pause';
+            icon.className = 'toggle-icon bx bx-music blink-active';
+            // Remove inline opacity if it was set
+            icon.style.opacity = "";
+            
             if (iconModal) iconModal.className = 'toggle-icon-modal bx bx-pause';
         } else {
             container.classList.remove('playing');
-            icon.className = 'toggle-icon bx bx-play';
+            icon.className = 'toggle-icon bx bx-music paused-state';
+            // Remove inline opacity so CSS can handle it properly with the pseudo-element
+            icon.style.opacity = "";
+            
             if (iconModal) iconModal.className = 'toggle-icon-modal bx bx-play';
         }
         
@@ -420,7 +443,7 @@ export class MusicPlayer extends Component {
         container.innerHTML = `
             <div class="music-player">
                 <button class="music-toggle" aria-label="Toggle Music" tabindex="-1">
-                    <i class="toggle-icon bx bx-play"></i>
+                    <i class="toggle-icon bx bx-music paused-state"></i>
                 </button>
                 
                 <div class="music-content">
@@ -519,13 +542,26 @@ export class MusicPlayer extends Component {
             toggleBtn.blur(); // Release focus immediately
             
             if (window.innerWidth <= 768) {
-                // Mobile: Only open modal, don't toggle play/pause
+                // Mobile: Just open modal
                 this.openModal();
             } else {
                 // Desktop: Toggle play/pause (dropdown shows on hover)
                 this.togglePlay();
             }
         });
+
+        // For better mobile touch handling
+        toggleBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing with click
+            e.stopPropagation();
+            toggleBtn.blur();
+            
+            if (window.innerWidth <= 768) {
+                this.openModal();
+            } else {
+                this.togglePlay();
+            }
+        }, { passive: false });
         
         const nextBtn = container.querySelector('.next-btn');
         nextBtn.addEventListener('click', (e) => {

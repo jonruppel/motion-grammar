@@ -53,6 +53,14 @@ export class ContentRegistry {
 
         this.register({
             type: 'case-study',
+            id: 'generative-works',
+            title: 'Generative Works',
+            category: 'case-studies',
+            dataPath: '/data/case-studies/generative-works.json'
+        });
+
+        this.register({
+            type: 'case-study',
             id: 'more-work',
             title: 'More Work',
             category: 'case-studies',

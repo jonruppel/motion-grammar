@@ -1,0 +1,510 @@
+{
+  "type": "case-study",
+  "id": "generative-works",
+  "title": "Generative Works",
+  "client": "Personal",
+  "role": "Curator / Creator",
+  "year": "2024",
+  "tags": [
+    "AI",
+    "Generative",
+    "Exploration"
+  ],
+  "overview": {
+    "challenge": "Exploring the boundaries of generative AI for creative direction and concept development.",
+    "solution": "A series of curated explorations across different domains including automotive, fashion, and abstract environments.",
+    "impact": "Developing new workflows and aesthetic vocabularies."
+  },
+  "metrics": [
+    {
+      "label": "Images",
+      "value": "76"
+    },
+    {
+      "label": "Tools",
+      "value": "Midjourney"
+    },
+    {
+      "label": "Year",
+      "value": "2024"
+    }
+  ],
+  "slides": [
+    {
+      "type": "overview",
+      "title": "Generative Works",
+      "description": "A curated collection of AI-generated imagery exploring automotive design, fashion, and abstract environments."
+    },
+    {
+      "type": "intro",
+      "title": "Automotive",
+      "content": "Exploration of automotive concepts."
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_GX_racked_focus_beauty_photography_--_50fad644-8a59-4aa4-a2e5-0d17163520b7_2.png",
+      "alt": "2024 lexus gx racked focus beauty photography --",
+      "caption": "2024 lexus gx racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_convertible_in_black_with_red_interi_3888f9bd-09a1-4a57-aacc-3710b20bd9d3.png",
+      "alt": "2024 lexus lc convertible in black with red interi",
+      "caption": "2024 lexus lc convertible in black with red interi"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_47e8e38a-2ab1-4faa-b3c1-f280f9da0cab_1.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_47e8e38a-2ab1-4faa-b3c1-f280f9da0cab_2.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_8b13135a-d3ac-4203-b2c3-c8c85cc6fb27_2.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_b38943ba-5828-44c1-b09f-3657e80caa96_1.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_b38943ba-5828-44c1-b09f-3657e80caa96_2.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_LC_racked_focus_beauty_photography_--_e2d49f66-f3a5-49e4-829b-056b03841717_1.png",
+      "alt": "2024 lexus lc racked focus beauty photography --",
+      "caption": "2024 lexus lc racked focus beauty photography --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_Lexus_RX_racked_focus_beauty_photography_--ar_05eb1e8c-7874-4f74-a02d-61efbd31bb2b.png",
+      "alt": "2024 lexus rx racked focus beauty photography --ar",
+      "caption": "2024 lexus rx racked focus beauty photography --ar"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_2024_glow_in_the_dark_Lexus_RC-F_low_angle_shot_on_dc1db799-2944-4a83-a930-6fea8f4a203f.png",
+      "alt": "2024 glow in the dark lexus rc-f low angle shot on",
+      "caption": "2024 glow in the dark lexus rc-f low angle shot on"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_Red_Lexus_lc_driving_down_pch_at_sunset_--ar_43__a50b10e5-85cc-4832-a154-6c0ba50b829a_3.png",
+      "alt": "Red lexus lc driving down pch at sunset --ar 43 ",
+      "caption": "Red lexus lc driving down pch at sunset --ar 43 "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_expression_of_Toyota_data_--ar_169_--v__2bb16721-1643-496c-97a4-ea37288d2ec2_2.png",
+      "alt": "Abstract expression of toyota data --ar 169 --v ",
+      "caption": "Abstract expression of toyota data --ar 169 --v "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_expression_of_Toyota_data_--ar_169_--v__41786140-3bc3-4f23-9783-9f8288520c2b_0.png",
+      "alt": "Abstract expression of toyota data --ar 169 --v ",
+      "caption": "Abstract expression of toyota data --ar 169 --v "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_expression_of_Toyota_data_--ar_169_--v__4719c3db-fe29-4ac8-88f9-0c94912edae2_2.png",
+      "alt": "Abstract expression of toyota data --ar 169 --v ",
+      "caption": "Abstract expression of toyota data --ar 169 --v "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_expression_of_Toyota_data_--ar_169_--v__bb8cec8f-357d-4a35-8901-dee53708503c_0.png",
+      "alt": "Abstract expression of toyota data --ar 169 --v ",
+      "caption": "Abstract expression of toyota data --ar 169 --v "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_expression_of_Toyota_data_--ar_169_--v__bb8cec8f-357d-4a35-8901-dee53708503c_3.png",
+      "alt": "Abstract expression of toyota data --ar 169 --v ",
+      "caption": "Abstract expression of toyota data --ar 169 --v "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_lexus_gx_and_a_toyota_forerunner_driving_through_f8c3452e-76dd-44a7-8910-fd990efa207d_2.png",
+      "alt": "Lexus gx and a toyota forerunner driving through",
+      "caption": "Lexus gx and a toyota forerunner driving through"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_lexus_gx_in_style_of_wireframe_models_black_and__b47307bd-73f1-4a31-85cd-eaf15b082c57_1.png",
+      "alt": "Lexus gx in style of wireframe models black and ",
+      "caption": "Lexus gx in style of wireframe models black and "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_modern_porsche_in_the_middle_of_an_iceburg_in_th_7b3f7b41-1af1-4f0d-b291-8b67a8a3b5eb_0.png",
+      "alt": "Modern porsche in the middle of an iceburg in th",
+      "caption": "Modern porsche in the middle of an iceburg in th"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_modern_porsche_in_the_middle_of_an_iceburg_in_th_f0afa574-a9bf-461e-850d-5c5da850c2a5_0.png",
+      "alt": "Modern porsche in the middle of an iceburg in th",
+      "caption": "Modern porsche in the middle of an iceburg in th"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_modern_porsche_in_the_middle_of_an_iceburg_in_the__651ec702-8ad7-4805-bbba-90ca836688d0.png",
+      "alt": "Modern porsche in the middle of an iceburg in the ",
+      "caption": "Modern porsche in the middle of an iceburg in the "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_toyota_vehicles_in_style_of_wireframe_models_bla_a828c37f-19ae-49da-827f-96c3c4f98515_3.png",
+      "alt": "Toyota vehicles in style of wireframe models bla",
+      "caption": "Toyota vehicles in style of wireframe models bla"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_polygon_minimalism_in_shades_of_red_wit_45d3bea7-0d6b-4b2a-ba2c-7742b12ed4f8_2.png",
+      "alt": "Abstract polygon minimalism in shades of red wit",
+      "caption": "Abstract polygon minimalism in shades of red wit"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_abstract_polygon_minimalism_in_shades_of_red_with__a0137a68-3179-4ee9-87e2-bd9b9e219337.png",
+      "alt": "Abstract polygon minimalism in shades of red with ",
+      "caption": "Abstract polygon minimalism in shades of red with "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_A_photo_of_an_orange_cat_wearing_streetwear_and__049710e1-8a73-4b86-aeb6-894ca7e56f69_0.png",
+      "alt": "A photo of an orange cat wearing streetwear and ",
+      "caption": "A photo of an orange cat wearing streetwear and "
+    },
+    {
+      "type": "intro",
+      "title": "Fashion",
+      "content": "Exploration of fashion concepts."
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_A_high-resolution_photograph_of_a_stylish_woman__a2323d66-e136-4c9a-b6a6-d57f2a8af3a8_0.png",
+      "alt": "A high-resolution photograph of a stylish woman ",
+      "caption": "A high-resolution photograph of a stylish woman "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_A_luxurious_high-end_fashion_photoshoot_in_an_el_0e6e3273-091a-4932-89f4-7a4f9a06e5cf_2.png",
+      "alt": "A luxurious high-end fashion photoshoot in an el",
+      "caption": "A luxurious high-end fashion photoshoot in an el"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_Luxe_fashion_macro_shots_of_shimmer_and_glitz_--_3d41b059-1d12-44ec-8581-d5371fac0dac_3.png",
+      "alt": "Luxe fashion macro shots of shimmer and glitz --",
+      "caption": "Luxe fashion macro shots of shimmer and glitz --"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_mirrors_in_urban_street__184b1ea5-a93f-41a2-9214-65cc5b931000_2.png",
+      "alt": "Beautiful ballerinas in mirrors in urban street ",
+      "caption": "Beautiful ballerinas in mirrors in urban street "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_fro_04ee7da5-9f01-48b4-8431-c501f374fd9e_0.png",
+      "alt": "Beautiful ballerinas in urban street wear in fro",
+      "caption": "Beautiful ballerinas in urban street wear in fro"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_fro_04ee7da5-9f01-48b4-8431-c501f374fd9e_1.png",
+      "alt": "Beautiful ballerinas in urban street wear in fro",
+      "caption": "Beautiful ballerinas in urban street wear in fro"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_fro_04ee7da5-9f01-48b4-8431-c501f374fd9e_3.png",
+      "alt": "Beautiful ballerinas in urban street wear in fro",
+      "caption": "Beautiful ballerinas in urban street wear in fro"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_fro_2135de02-bcf6-40be-ab7e-df0796ed48ea_0.png",
+      "alt": "Beautiful ballerinas in urban street wear in fro",
+      "caption": "Beautiful ballerinas in urban street wear in fro"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_fro_b752fe02-75d9-4565-9c42-d20642a8b01c_1.png",
+      "alt": "Beautiful ballerinas in urban street wear in fro",
+      "caption": "Beautiful ballerinas in urban street wear in fro"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_ballerinas_in_urban_street_wear_in_front_55fa4bbf-da95-4271-a97f-7ce089c9798f.png",
+      "alt": "Beautiful ballerinas in urban street wear in front",
+      "caption": "Beautiful ballerinas in urban street wear in front"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_in_mirrors_in_street_wear_in_ar_7862308f-6433-4ba6-b877-6dd60542bf92_1.png",
+      "alt": "Beautiful models in mirrors in street wear in ar",
+      "caption": "Beautiful models in mirrors in street wear in ar"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_in_mirrors_in_street_wear_in_arch_44f94ba6-e4da-40dd-9526-d2ff13403d38.png",
+      "alt": "Beautiful models in mirrors in street wear in arch",
+      "caption": "Beautiful models in mirrors in street wear in arch"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_in_street_wear_in_architectural_2ae263b7-ef33-4331-9836-b128a91b3eea_1.png",
+      "alt": "Beautiful models in street wear in architectural",
+      "caption": "Beautiful models in street wear in architectural"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_in_street_wear_in_architectural_e110acaa-714b-452b-b150-8307150a1892_1.png",
+      "alt": "Beautiful models in street wear in architectural",
+      "caption": "Beautiful models in street wear in architectural"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_in_street_wear_in_architectural_s_b60129a1-0e11-4f2d-8d7c-87ffac1c0b25.png",
+      "alt": "Beautiful models in street wear in architectural s",
+      "caption": "Beautiful models in street wear in architectural s"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_with_crossed_eyes_peg_legs_and__45ce5137-cc3a-4796-b9f9-02e3719e8822_3.png",
+      "alt": "Beautiful models with crossed eyes peg legs and ",
+      "caption": "Beautiful models with crossed eyes peg legs and "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_models_with_crossed_eyes_peg_legs_and__69ec3f65-d7d9-4cf0-9b21-962425e5e193_3.png",
+      "alt": "Beautiful models with crossed eyes peg legs and ",
+      "caption": "Beautiful models with crossed eyes peg legs and "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_model_in_a_white_dress_over_a_cloud_in_the_style_24adde28-b1cc-46b3-8a4b-68063c8c06d2_0.png",
+      "alt": "Model in a white dress over a cloud in the style",
+      "caption": "Model in a white dress over a cloud in the style"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_model_in_a_white_dress_over_a_cloud_in_the_style_24adde28-b1cc-46b3-8a4b-68063c8c06d2_3.png",
+      "alt": "Model in a white dress over a cloud in the style",
+      "caption": "Model in a white dress over a cloud in the style"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_model_sara_lewis_and_jonathon_fauntleroy_in_a_gree_73e4a2ba-ffda-4139-b49a-732ee7bf0286.png",
+      "alt": "Model sara lewis and jonathon fauntleroy in a gree",
+      "caption": "Model sara lewis and jonathon fauntleroy in a gree"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_model_sara_lewis_and_jonathon_fauntleroy_in_a_gree_a8711485-b9d0-4b30-bd81-57702e86c8ad.png",
+      "alt": "Model sara lewis and jonathon fauntleroy in a gree",
+      "caption": "Model sara lewis and jonathon fauntleroy in a gree"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_model_skydiving_in_slow_motion_style_of_couture__85b30339-bc18-431f-b974-766695fb0fd8_0.png",
+      "alt": "Model skydiving in slow motion style of couture ",
+      "caption": "Model skydiving in slow motion style of couture "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_series_of_bancing_ballerinas_in_a_modern_archite_55d71b24-55a5-436d-98a5-88abf99ef5d4_1.png",
+      "alt": "Series of bancing ballerinas in a modern archite",
+      "caption": "Series of bancing ballerinas in a modern archite"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_series_of_bancing_ballerinas_in_a_modern_archite_55d71b24-55a5-436d-98a5-88abf99ef5d4_3.png",
+      "alt": "Series of bancing ballerinas in a modern archite",
+      "caption": "Series of bancing ballerinas in a modern archite"
+    },
+    {
+      "type": "intro",
+      "title": "Abstract & Environments",
+      "content": "Exploration of abstract & environments concepts."
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_beautiful_view_of_the_ocean_with_waves_and_bri_636023d7-17f8-43ba-854c-a202c4a5dee3_1.png",
+      "alt": "A beautiful view of the ocean with waves and bri",
+      "caption": "A beautiful view of the ocean with waves and bri"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_beautiful_view_of_the_ocean_with_waves_and_bri_636023d7-17f8-43ba-854c-a202c4a5dee3_2.png",
+      "alt": "A beautiful view of the ocean with waves and bri",
+      "caption": "A beautiful view of the ocean with waves and bri"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_an_aerial_photograph_of_an_ocean_and_some_beach__4346b437-2f17-4a43-a3db-020cceec0c04_0.png",
+      "alt": "An aerial photograph of an ocean and some beach ",
+      "caption": "An aerial photograph of an ocean and some beach "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_white_canoe_rests_on_a_turquoise_blue_lake_in_th_994dff6c-9d39-4a3c-b449-58e3ed88fa76.png",
+      "alt": "A white canoe rests on a turquoise blue lake in th",
+      "caption": "A white canoe rests on a turquoise blue lake in th"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_an_aerial_view_of_beach_umbrellas_and_sand_chairs__80258cad-60db-4275-a979-a3c63a3eeb22.png",
+      "alt": "An aerial view of beach umbrellas and sand chairs ",
+      "caption": "An aerial view of beach umbrellas and sand chairs "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_lot_of_yellow_and_blue_chairs_on_a_tan_tile_fl_b7ca079e-f188-44d0-94f4-6d780b4cc7d3_3.png",
+      "alt": "A lot of yellow and blue chairs on a tan tile fl",
+      "caption": "A lot of yellow and blue chairs on a tan tile fl"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_the_blue_chairs_are_lining_up_in_front_of_many_o_f7f84bb7-8e5e-4f4a-9e39-236091af24b5_3.png",
+      "alt": "The blue chairs are lining up in front of many o",
+      "caption": "The blue chairs are lining up in front of many o"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_minimal_areal_photo_of_a_stingray_from_overhead__b6a6b7c2-3f8f-40be-b059-78fa239171d2_2.png",
+      "alt": "Minimal areal photo of a stingray from overhead ",
+      "caption": "Minimal areal photo of a stingray from overhead "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_small_sailboat_on_calm_ocean_during_sunrise_in_the_dab4b322-bada-4503-83cb-5244bbf0ba00.png",
+      "alt": "Small sailboat on calm ocean during sunrise in the",
+      "caption": "Small sailboat on calm ocean during sunrise in the"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_the_sailboat_is_in_calm_waters_with_fog_surround_4dee1809-6e3d-4c25-822d-17e65fd126ee_2.png",
+      "alt": "The sailboat is in calm waters with fog surround",
+      "caption": "The sailboat is in calm waters with fog surround"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_sky_over_a_costal_metropolis_style_of__4765b81d-f36b-4bcb-9655-6f87978afbbf_1.png",
+      "alt": "Beautiful sky over a costal metropolis style of ",
+      "caption": "Beautiful sky over a costal metropolis style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_sky_over_a_costal_metropolis_style_of__9d3542cc-3247-4cc3-a8e1-367c341f018e_0.png",
+      "alt": "Beautiful sky over a costal metropolis style of ",
+      "caption": "Beautiful sky over a costal metropolis style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_beautiful_sky_over_a_costal_metropolis_style_of__f583d93e-8658-4237-891a-80f2b3985d1b_2.png",
+      "alt": "Beautiful sky over a costal metropolis style of ",
+      "caption": "Beautiful sky over a costal metropolis style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_fluffy_white_clouds_on_an_open_blue_sky_backgrou_f1ac8e57-5585-4f2b-bba3-776e31797a64_1.png",
+      "alt": "Fluffy white clouds on an open blue sky backgrou",
+      "caption": "Fluffy white clouds on an open blue sky backgrou"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_fluffy_white_clouds_on_an_open_blue_sky_backgrou_f1ac8e57-5585-4f2b-bba3-776e31797a64_3.png",
+      "alt": "Fluffy white clouds on an open blue sky backgrou",
+      "caption": "Fluffy white clouds on an open blue sky backgrou"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_Apollo_rocket_on_launch_pad_--quality_2_--v_6.1_1a782f0f-430d-4073-8cd4-8b0aaef526c7_2.png",
+      "alt": "Apollo rocket on launch pad --quality 2 --v 6.1",
+      "caption": "Apollo rocket on launch pad --quality 2 --v 6.1"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_rocket_on_a_launchpad_--ar_169_--quality_2_--v_6_b2e83d86-a49c-41ad-9c2c-9bdcb150c829_2.png",
+      "alt": "Rocket on a launchpad --ar 169 --quality 2 --v 6",
+      "caption": "Rocket on a launchpad --ar 169 --quality 2 --v 6"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_gray_wall_with_black_paint_inside_in_the_style_36228efb-1e36-4efc-935d-8ed949f095ba_1.png",
+      "alt": "A gray wall with black paint inside in the style",
+      "caption": "A gray wall with black paint inside in the style"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_the_ceiling_is_yellow_in_the_style_of_kim_keever_2cf33680-ea94-4069-9df4-f2209798c15a_0.png",
+      "alt": "The ceiling is yellow in the style of kim keever",
+      "caption": "The ceiling is yellow in the style of kim keever"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_the_wall_is_blue_in_the_style_of_kim_keever_kitc_961d5e2e-5862-4d31-b4da-4494a00390f7_3.png",
+      "alt": "The wall is blue in the style of kim keever kitc",
+      "caption": "The wall is blue in the style of kim keever kitc"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_a_detailed_and_vibrant_image_that_captures_the_e_ffc7cfb8-bfc6-4f34-a2fe-dbedec4603d0_3.png",
+      "alt": "A detailed and vibrant image that captures the e",
+      "caption": "A detailed and vibrant image that captures the e"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_an_abstract_image_of_colorful_waves_in_the_style_35560420-35cf-4e95-a577-05e04b44be6a_0.png",
+      "alt": "An abstract image of colorful waves in the style",
+      "caption": "An abstract image of colorful waves in the style"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_an_abstract_image_of_colorful_waves_in_the_style_35560420-35cf-4e95-a577-05e04b44be6a_1.png",
+      "alt": "An abstract image of colorful waves in the style",
+      "caption": "An abstract image of colorful waves in the style"
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_people_and_technology_culture_and_code_style_of__025f6097-a6e2-4073-93b9-967c4c2682b2_3.png",
+      "alt": "People and technology culture and code style of ",
+      "caption": "People and technology culture and code style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_people_and_technology_culture_and_code_style_of__62c5e81d-b16c-4dc3-bb0a-ad3d045ce542_2.png",
+      "alt": "People and technology culture and code style of ",
+      "caption": "People and technology culture and code style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_people_and_technology_culture_and_code_style_of__62c5e81d-b16c-4dc3-bb0a-ad3d045ce542_3.png",
+      "alt": "People and technology culture and code style of ",
+      "caption": "People and technology culture and code style of "
+    },
+    {
+      "type": "image",
+      "src": "/images/case-studies/gallery-images/jonnyhightop_people_and_technology_culture_and_code_style_of__672bf18c-d51b-4c55-a21f-a5868d09edb6_3.png",
+      "alt": "People and technology culture and code style of ",
+      "caption": "People and technology culture and code style of "
+    }
+  ]
+}

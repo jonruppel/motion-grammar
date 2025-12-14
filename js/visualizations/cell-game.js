@@ -69,20 +69,27 @@ class Prey {
     }
     
     createMesh() {
-        // Create a small circle for prey
-        const preyGeom = new THREE.CircleGeometry(this.radius, 32);
+        // Create a ring for prey (hollow circle)
+        // Ring inner radius is slightly smaller than outer to create line thickness
+        // Membrane tube radius is lineWidth/20, so diameter (visible thickness) is lineWidth/10
+        const lineThickness = this.settings.cell.lineWidth / 10; // Match membrane visible thickness
+        const innerRadius = Math.max(0.01, this.radius - lineThickness);
+        const outerRadius = this.radius;
         
-        // Get border color from CSS
-        let borderColor = 0xFFAA00; // Default orange fallback
-        const borderCSSValue = getComputedStyle(document.documentElement).getPropertyValue('--color-border');
-        if (borderCSSValue) {
-            borderColor = new THREE.Color(borderCSSValue.trim());
+        const preyGeom = new THREE.RingGeometry(innerRadius, outerRadius, 32);
+        
+        // Get accent color from CSS (same as nucleus)
+        let accentColor = 0x00AAFF; // Default blue fallback
+        const accentCSSValue = getComputedStyle(document.documentElement).getPropertyValue('--color-accent');
+        if (accentCSSValue) {
+            accentColor = new THREE.Color(accentCSSValue.trim());
         }
         
         const preyMat = new THREE.MeshBasicMaterial({
-            color: borderColor,  // Use app's border color
+            color: accentColor,  // Use app's accent color (same as nucleus)
             transparent: true,
-            opacity: 0.8,
+            opacity: 1.0,
+            side: THREE.DoubleSide
         });
         this.mesh = new THREE.Mesh(preyGeom, preyMat);
         this.mesh.position.z = 0.05; // Slightly behind nucleus
@@ -971,15 +978,10 @@ export class Cell {
             pointMesh.material.color.set(membraneColor);
         }
         
-        // Update colors of prey cells
-        let borderColor = 0xFFAA00; // Default orange fallback
-        const borderCSSValue = getComputedStyle(document.documentElement).getPropertyValue('--color-border');
-        if (borderCSSValue) {
-            borderColor = new THREE.Color(borderCSSValue.trim());
-        }
+        // Update colors of prey cells (use accent color, same as nucleus)
         for (const p of this.prey) {
             if (p.mesh && p.mesh.material) {
-                p.mesh.material.color.set(borderColor);
+                p.mesh.material.color.set(nucleusColor);
             }
         }
     }
@@ -1192,10 +1194,12 @@ export class Cell {
 
         this.time += 0.016;
 
-        // Audio reactivity
+        // Audio reactivity - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
-        if (window.audioAnalyser) {
+        const isMusicPlaying = window.musicIsPlaying || false;
+        
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -1211,6 +1215,49 @@ export class Cell {
                 audioEnergy = (avg / 255) * volume;
                 audioData = dataArray;
             }
+        }
+        
+        // Reset if music not playing
+        if (!isMusicPlaying) {
+            audioEnergy = 0;
+            audioData = null;
+        }
+        
+        // Update scene background based on high frequencies (like moon in Through the Wire)
+        if (audioData) {
+            const volume = typeof window.musicVolume !== 'undefined' ? window.musicVolume : 1.0;
+            
+            // Use mid-high frequency bins for snare/click detection (bins 20-30)
+            let highFreqSum = 0;
+            const startBin = 20;
+            const endBin = 30;
+            for (let i = startBin; i < endBin && i < audioData.length; i++) {
+                highFreqSum += audioData[i];
+            }
+            const highFreqAvg = highFreqSum / (endBin - startBin);
+            // Increase sensitivity by multiplying by 2.0
+            const normalizedHighFreq = Math.min(1, (highFreqAvg / 255) * volume * 2.0);
+            
+            // Get base background color
+            const baseBackgroundColor = this.parseCSSColor(this.settings.background.color);
+            
+            // Map to color: low = base + slight blue tint, high = base + red tint
+            const blueColor = new THREE.Color(0x3b82f6); // Blue
+            const redColor = new THREE.Color(0xef4444); // Red
+            
+            // Lerp between blue and red for the tint
+            const tintColor = blueColor.clone().lerp(redColor, normalizedHighFreq);
+            
+            // Mix base color with tint (0.05 to 0.70 intensity)
+            const tintStrength = 0.05 + normalizedHighFreq * 0.65;
+            const targetColor = baseBackgroundColor.clone().lerp(tintColor, tintStrength);
+            
+            // More responsive transitions
+            this.scene.background.lerp(targetColor, 0.5);
+        } else {
+            // No audio - fade back to base color
+            const baseBackgroundColor = this.parseCSSColor(this.settings.background.color);
+            this.scene.background.lerp(baseBackgroundColor, 0.1);
         }
         
         // Use audio data to modulate cell properties
@@ -1284,14 +1331,20 @@ export class Cell {
             }
 
         } else {
-            // Reset scales/colors if no audio
-             for (const nucleus of this.nuclei) {
+            // Reset scales/colors if no audio - immediate reset
+            const accentColor = this.parseCSSColor(this.settings.cell.nucleusColor);
+            for (const nucleus of this.nuclei) {
+                nucleus.currentScale = 1.0;
                 nucleus.visualMesh.scale.setScalar(1.0);
-             }
-             if (this.membrane) {
-                 const baseMembraneColor = this.parseCSSColor(this.settings.cell.membraneColor);
-                 this.membrane.material.color.copy(baseMembraneColor);
-             }
+                // Reset nucleus color to base accent color immediately
+                if (!nucleus.isNewNucleus) {
+                    nucleus.visualMesh.material.color.copy(accentColor);
+                }
+            }
+            if (this.membrane) {
+                const baseMembraneColor = this.parseCSSColor(this.settings.cell.membraneColor);
+                this.membrane.material.color.copy(baseMembraneColor);
+            }
         }
 
         this.updateCellPhysics();

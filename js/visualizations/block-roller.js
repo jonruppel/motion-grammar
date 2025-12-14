@@ -351,12 +351,13 @@ export class BlockRoller {
     animate() {
         if (!this.isRunning) return;
         
-        // Audio reactivity
+        // Audio reactivity - only process if music is actually playing
         let audioEnergy = 0;
         let audioData = null;
         let volume = 1.0;
+        const isMusicPlaying = window.musicIsPlaying || false;
         
-        if (window.audioAnalyser) {
+        if (window.audioAnalyser && isMusicPlaying) {
             const bufferLength = window.audioAnalyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
             window.audioAnalyser.getByteFrequencyData(dataArray);
@@ -373,11 +374,16 @@ export class BlockRoller {
             }
         }
         
-        this.currentAudioEnergy = audioEnergy;
-        this.currentAudioData = audioData; // Store for per-tile visualization
+        // Reset if music not playing
+        this.currentAudioEnergy = isMusicPlaying ? audioEnergy : 0;
+        this.currentAudioData = isMusicPlaying ? audioData : null; // Store for per-tile visualization
         
-        // Smooth energy
-        this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        // Smooth energy - immediately reset to 0 if no audio data or music not playing
+        if (!audioData || !isMusicPlaying) {
+            this.smoothedEnergy = 0;
+        } else {
+            this.smoothedEnergy += (audioEnergy - this.smoothedEnergy) * 0.1;
+        }
         
         // Beat Detection
         const now = Date.now();

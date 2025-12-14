@@ -7,6 +7,7 @@ import { Tutorial } from './components/index.js';
 import { uiLayerManager } from './utils/fullscreen-manager.js';
 import { MusicPlayer } from './components/organisms/MusicPlayer.js';
 import { lazyImageLoader } from './utils/lazy-image-loader.js';
+import { globalPreloader } from './utils/global-preloader.js';
 
 class App {
     constructor() {
@@ -142,6 +143,11 @@ class App {
         this.isFirstLoad = false;
 
         this.isReady = true;
+
+        // Start background preloading of site title images
+        setTimeout(() => {
+            globalPreloader.preloadSiteTitleImages();
+        }, 2000);
     }
 
     async loadContent(itemId, modulePathOrType) {
@@ -155,6 +161,7 @@ class App {
         // Update URL
         const url = new URL(window.location);
         url.searchParams.set('experience', itemId);
+        url.searchParams.delete('slide'); // Clear slide param on new navigation
         window.history.pushState({}, '', url);
 
         // Update active nav
@@ -240,6 +247,7 @@ class App {
     async handleUrlNavigation() {
         const params = new URLSearchParams(window.location.search);
         const experienceId = params.get('experience');
+        const slideIndex = parseInt(params.get('slide'), 10) || 0;
 
         if (experienceId) {
             // Find the module path using navigationData
@@ -251,7 +259,7 @@ class App {
                     this.navigation.setActive(experienceId);
                 }
                 // Load the content (handles all types)
-                await this.contentManager.loadContent(experienceId, modulePath);
+                await this.contentManager.loadContent(experienceId, modulePath, null, slideIndex);
                 
                 // Refresh lazy image loader for initial content
                 lazyImageLoader.refresh();
@@ -465,6 +473,28 @@ class App {
             desc.dataset.originalText = desc.innerHTML;
         }
         
+        // Find the appropriate container to insert the overlay into
+        const mainContent = document.querySelector('.main-content');
+        if (!mainContent) return;
+
+        // Create a background overlay specifically for the title animation
+        const titleOverlay = document.createElement('div');
+        titleOverlay.className = 'home-title-overlay';
+        titleOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-bg-primary);
+            opacity: 0;
+            z-index: 9; /* Below header (10) but above visualization */
+            pointer-events: none;
+        `;
+        
+        // Insert overlay into main-content, before the header
+        mainContent.insertBefore(titleOverlay, header);
+        
         // Ensure visible
         gsap.set(header, { 
             display: 'block', 
@@ -489,16 +519,20 @@ class App {
             scale: 0.5
         });
         
-        // Reset desc for scramble
-        desc.style.opacity = 1;
+        // Reset desc for scramble - START HIDDEN
+        desc.style.opacity = 0;
         desc.innerText = ''; // Start empty/ready for scramble
         
         const tl = gsap.timeline();
         
-        // Trigger scramble in
-        this.scrambleText(desc, desc.dataset.originalText, 1500, 'in');
+        // Animate Overlay In (to 0.5 opacity)
+        tl.to(titleOverlay, {
+            opacity: 0.5,
+            duration: 0.8,
+            ease: 'power2.out'
+        }, 0);
         
-        // Animate In - Beautiful Build
+        // Animate In - Beautiful Build (logo characters)
         tl.to(chars, {
             y: 0,
             opacity: 1,
@@ -507,7 +541,17 @@ class App {
             duration: 1.2,
             stagger: 0.04,
             ease: 'expo.out' // Dramatic easing
-        });
+        }, 0.3);
+        
+        // Fade in description container, then trigger scramble
+        tl.to(desc, {
+            opacity: 1,
+            duration: 0.3,
+            onStart: () => {
+                // Trigger scramble in once visible
+                this.scrambleText(desc, desc.dataset.originalText, 1500, 'in');
+            }
+        }, 1.0);
         
         // Wait
         tl.to({}, { duration: duration / 1000 });
@@ -526,6 +570,16 @@ class App {
             stagger: 0.02,
             ease: 'power2.in'
         });
+        
+        // Animate Overlay Out
+        tl.to(titleOverlay, {
+            opacity: 0,
+            duration: 0.8,
+            ease: 'power2.inOut',
+            onComplete: () => {
+                titleOverlay.remove();
+            }
+        }, '-=0.8');
         
         await tl;
     }
@@ -655,43 +709,6 @@ class App {
             } else {
                 element.appendChild(node.cloneNode(true));
             }
-        });
-    }
-
-    async showTitleTemporarily(duration = 3000) {
-        const headerElement = document.querySelector('.content-header');
-        if (!headerElement) return;
-
-        const isDesktop = window.innerWidth > 768;
-
-        // Ensure visible properties
-        gsap.set(headerElement, {
-            display: 'block',
-            position: 'absolute',
-            zIndex: 10,
-            top: '50%',
-            y: '-50%',
-            pointerEvents: 'none',
-            opacity: 0
-        });
-
-        // Animate In
-        await gsap.to(headerElement, {
-            opacity: 1,
-            duration: 0.8,
-            ease: 'power2.out',
-            overwrite: true
-        });
-
-        // Wait
-        await new Promise(resolve => setTimeout(resolve, duration));
-
-        // Animate Out
-        await gsap.to(headerElement, {
-            opacity: 0,
-            duration: 0.8,
-            ease: 'power2.inOut',
-            overwrite: true
         });
     }
 
@@ -1143,17 +1160,29 @@ class App {
     }
 
     setupSwipeNavigation() {
+        let touchStartX = 0;
         let touchStartY = 0;
         let touchEndY = 0;
         let lastSwipeTime = 0;
+        let isValidSwipeStart = false;
         const swipeThreshold = 50;
         const swipeCooldown = 1000; // 1 second cooldown between swipes
 
         document.addEventListener('touchstart', (e) => {
+            // Ignore if touching sidebar or menu toggle
+            if (e.target.closest('.sidebar') || 
+                e.target.closest('.mobile-menu-toggle')) {
+                isValidSwipeStart = false;
+                return;
+            }
+            
+            isValidSwipeStart = true;
+            touchStartX = e.changedTouches[0].screenX;
             touchStartY = e.changedTouches[0].screenY;
         }, { passive: true });
 
         document.addEventListener('touchend', (e) => {
+            if (!isValidSwipeStart) return;
             // Skip swipe navigation if any visualization is actively using touch/drag
             if (window.isVisualizationDragging) {
                 return;
@@ -1162,13 +1191,22 @@ class App {
             const now = Date.now();
             if (this.isTransitioning || (now - lastSwipeTime) < swipeCooldown) return;
 
+            const touchEndX = e.changedTouches[0].screenX;
             touchEndY = e.changedTouches[0].screenY;
-            const swipeDistance = touchStartY - touchEndY;
+            
+            const swipeDistanceX = touchStartX - touchEndX;
+            const swipeDistanceY = touchStartY - touchEndY;
 
-            if (Math.abs(swipeDistance) > swipeThreshold) {
+            // If horizontal movement is significant and greater than vertical, assume horizontal swipe and ignore
+            // This prevents diagonal swipes from triggering vertical navigation
+            if (Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY) && Math.abs(swipeDistanceX) > 30) {
+                return;
+            }
+
+            if (Math.abs(swipeDistanceY) > swipeThreshold) {
                 lastSwipeTime = now;
                 
-                if (swipeDistance > 0) {
+                if (swipeDistanceY > 0) {
                     // Swipe up - next
                     this.navigateToNext();
                 } else {
@@ -1176,6 +1214,8 @@ class App {
                     this.navigateToPrevious();
                 }
             }
+            
+            isValidSwipeStart = false;
         }, { passive: true });
     }
 
@@ -1231,6 +1271,7 @@ class App {
         // Step 2: Load new content while off-screen
         const url = new URL(window.location);
         url.searchParams.set('experience', targetModule.id);
+        url.searchParams.delete('slide'); // Clear slide param on new navigation
         window.history.pushState({}, '', url);
         this.navigation.setActive(targetModule.id);
         
